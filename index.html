@@ -1,1 +1,18 @@
-<h1>balls</h1>
+async function loadTrainer(username) {
+  const response = await fetch(`https://pokemon.brandenkenn.workers.dev?user=${username}&userstats=true&format=json`);
+  const data = await response.json();
+
+  document.getElementById('balance').innerText = `₽${data.balance}`;
+  
+  const list = document.getElementById('pokemon-list');
+  data.collection.forEach(entry => {
+    // Extract name from "Pikachu(15/15/15)"
+    const name = entry.split('(')[0].replace('✨', '').toLowerCase();
+    const isShiny = entry.includes('✨');
+    
+    const img = document.createElement('img');
+    // Pulls sprite from the official GitHub assets
+    img.src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${isShiny ? 'shiny/' : ''}${name}.png`;
+    list.appendChild(img);
+  });
+}
