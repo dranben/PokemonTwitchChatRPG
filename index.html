@@ -1,18 +1,9 @@
-async function loadTrainer(username) {
-  const response = await fetch(`https://pokemon.brandenkenn.workers.dev?user=${username}&userstats=true&format=json`);
-  const data = await response.json();
-
-  document.getElementById('balance').innerText = `₽${data.balance}`;
-  
-  const list = document.getElementById('pokemon-list');
-  data.collection.forEach(entry => {
-    // Extract name from "Pikachu(15/15/15)"
-    const name = entry.split('(')[0].replace('✨', '').toLowerCase();
-    const isShiny = entry.includes('✨');
+<div id="trainer-card">
+    <h2 id="trainer-name">Loading Trainer...</h2>
+    <p>Balance: <span id="trainer-balance">₽0</span></p>
+    <p>Total Catches: <span id="trainer-total">0</span></p>
     
-    const img = document.createElement('img');
-    // Pulls sprite from the official GitHub assets
-    img.src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${isShiny ? 'shiny/' : ''}${name}.png`;
-    list.appendChild(img);
-  });
-}
+    <h3>Recent Collection</h3>
+    <div id="pokemon-display" style="display: flex; flex-wrap: wrap; gap: 10px;">
+        </div>
+</div>
