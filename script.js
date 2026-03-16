@@ -5,7 +5,7 @@
 
 // --- 1. CONFIGURATION ---
 const WORKER_URL = "https://pokemon.brandenkenn.workers.dev";
-const DEFAULT_TRAINER = "Branden";
+const DEFAULT_TRAINER = "dranben";
 
 // --- 2. MAIN FETCH FUNCTION ---
 async function fetchTrainerData(username) {
