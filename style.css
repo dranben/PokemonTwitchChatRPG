@@ -196,3 +196,71 @@ h3 { color: white; font-family: 'Press Start 2P', cursive; font-size: 0.6rem; ma
 .leader-rank { color: gold; }
 .leader-name { color: white; }
 .leader-count { color: #51ff00; }
+
+/* --- TAB STYLES --- */
+.pokedex-tabs {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 10px;
+    border-bottom: 4px solid #a12308;
+    padding-bottom: 5px;
+}
+
+.tab-btn {
+    flex: 1;
+    background: #313131;
+    color: #888;
+    border: none;
+    padding: 10px;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 0.55rem;
+    cursor: pointer;
+    border-radius: 5px 5px 0 0;
+    transition: all 0.2s;
+}
+
+.tab-btn.active {
+    background: #51ff00;
+    color: #313131;
+    box-shadow: 0 -3px 0 #fff;
+}
+
+/* --- TAB TOGGLING --- */
+.tab-content {
+    display: none; /* Hide by default */
+    flex-direction: column;
+    gap: 12px;
+}
+
+.tab-content.active {
+    display: flex; /* Show active tab */
+}
+
+/* Leaderboard Specific Styles */
+#leaderboard-view {
+    background: #222;
+    padding: 20px;
+    border-radius: 10px;
+    border: 4px solid #111;
+    min-height: 400px;
+}
+
+.terminal-header {
+    color: #51ff00;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 0.8rem;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.leader-row {
+    display: flex;
+    justify-content: space-between;
+    color: white;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 0.55rem;
+    padding: 15px 0;
+    border-bottom: 1px solid #444;
+}
+
+.leader-count { color: #51ff00; }
