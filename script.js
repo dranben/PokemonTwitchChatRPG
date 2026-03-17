@@ -13,25 +13,54 @@ function loginWithTwitch() {
     window.location.href = authUrl;
 }
 
+function checkSession() {
+    const savedUser = localStorage.getItem('twitch_user');
+    const savedToken = localStorage.getItem('auth_token');
+
+    if (savedUser && savedToken && savedToken !== "undefined") {
+        updateAuthUI(savedUser);
+        return true;
+    }
+    return false;
+}
+
+function updateAuthUI(username) {
+    const loginBtn = document.getElementById('login-btn');
+    const userDisplay = document.getElementById('user-display');
+
+    if (loginBtn && userDisplay) {
+        loginBtn.style.display = 'none';
+        userDisplay.innerText = `TRAINER: ${username.toUpperCase()}`;
+        userDisplay.style.display = 'inline-block';
+        // Add a little glow to show it's active
+        userDisplay.style.textShadow = "0 0 10px #51ff00";
+    }
+}
+
 async function handleTwitchRedirect() {
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get('code');
 
+    // If there's a code in the URL, we just got back from Twitch
     if (code) {
         try {
             const res = await fetch(`${WORKER_URL}?login_code=${code}`);
             const authData = await res.json();
 
             if (authData.status === "success") {
-                // MATCHING THE NAMES:
                 localStorage.setItem('twitch_user', authData.user);
-                localStorage.setItem('auth_token', authData.token); // Make sure this matches the Worker's key
-
-                window.location.href = "/";
+                localStorage.setItem('auth_token', authData.token);
+                
+                // Clean the URL so the 'code' doesn't hang around
                 window.history.replaceState({}, document.title, "/");
                 updateAuthUI(authData.user);
             }
-        } catch (e) { console.error("Login Failed:", e); }
+        } catch (e) {
+            console.error("Auth Handshake Failed:", e);
+        }
+    } else {
+        // No code in URL? Check if we already have a session saved
+        checkSession();
     }
 }
 
@@ -239,8 +268,16 @@ document.getElementById('sort-order').addEventListener('change', (e) => {
 });
 
 // --- 6. INITIAL LOAD ---
-window.onload = () => {
-    handleTwitchRedirect();
+window.onload = async () => {
+    // 1. Handle any incoming login redirects
+    await handleTwitchRedirect();
+
+    // 2. Decide whose data to show
     const urlParams = new URLSearchParams(window.location.search);
-    fetchTrainerData(urlParams.get('user') || 'dranben');
+    const userToLoad = urlParams.get('user') || localStorage.getItem('twitch_user') || 'dranben';
+    
+    // 3. Update the UI input field to show who we are looking at
+    document.getElementById('username-input').value = userToLoad;
+    
+    fetchTrainerData(userToLoad);
 };
