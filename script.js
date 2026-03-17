@@ -55,13 +55,27 @@ async function fetchTrainerData(user) {
 function renderSprites(list) {
     const display = document.getElementById('pokemon-display');
     display.innerHTML = "";
+    
     [...list].reverse().forEach(entry => {
-        if (!entry) return;
-        const isShiny = entry.includes('✨'), name = entry.split('(')[0].replace('✨', '').toLowerCase().trim();
+        let name, isShiny, title;
+
+        // LEGACY CHECK: If it's a string (old catch), parse it. 
+        // If it's an object (new catch), use the properties.
+        if (typeof entry === 'string') {
+            isShiny = entry.includes('✨');
+            name = entry.split('(')[0].replace('✨', '').toLowerCase().trim();
+            title = entry;
+        } else {
+            isShiny = entry.s === 1;
+            name = entry.n.toLowerCase();
+            title = `${isShiny ? '✨' : ''}${entry.n} (${entry.iv.join('/')})`;
+        }
+
         const img = document.createElement('img');
         img.src = `https://img.pokemondb.net/sprites/home/${isShiny ? 'shiny' : 'normal'}/${name}.png`;
-        img.title = entry;
+        img.title = title;
         if (isShiny) img.classList.add('shiny-glow');
+        
         img.onerror = () => img.src = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png";
         display.appendChild(img);
     });
@@ -115,6 +129,7 @@ document.getElementById('sort-order').addEventListener('change', async (e) => {
         sorted.sort((a, b) => b.includes('✨') - a.includes('✨'));
     } else if (val === "pokedex") {
         // Pokedex sort requires a bit more heavy lifting
+        document.getElementById('pokemon-display').classList.add('sorting-blur');
         document.getElementById('trainer-name').innerText = "SORTING...";
         
         // Create a map of names to IDs to avoid duplicate API calls
@@ -125,6 +140,7 @@ document.getElementById('sort-order').addEventListener('change', async (e) => {
                 const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${name}`);
                 const d = await res.json();
                 nameToId[name] = d.id;
+        document.getElementById('pokemon-display').classList.remove('sorting-blur');
             }
         }
         
@@ -138,7 +154,7 @@ document.getElementById('sort-order').addEventListener('change', async (e) => {
     }
 
     // Newest is the default (reversed array)
-    renderSprites(sorted); 
+    renderSprites(sorted);
 });
 
 window.onload = () => fetchTrainerData(new URLSearchParams(window.location.search).get('user') || 'dranben');
