@@ -172,8 +172,10 @@ document.getElementById('search-btn').addEventListener('click', () => {
 document.getElementById('pokemon-filter').addEventListener('input', (e) => {
     const term = e.target.value.toLowerCase();
     const filtered = fullCollection.filter(i => {
-        const name = typeof i === 'object' ? i.n : i;
-        return name.toLowerCase().includes(term);
+        if (!i) return false; // Skip nulls
+        const name = (typeof i === 'object') ? i.n : i;
+        // Ensure name is a string before calling includes
+        return String(name).toLowerCase().includes(term);
     });
     renderSprites(filtered);
 });
