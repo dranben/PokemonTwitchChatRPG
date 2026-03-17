@@ -26,7 +26,8 @@ async function handleTwitchRedirect() {
                 // MATCHING THE NAMES:
                 localStorage.setItem('twitch_user', authData.user);
                 localStorage.setItem('auth_token', authData.token); // Make sure this matches the Worker's key
-                
+
+                window.location.href = "/";
                 window.history.replaceState({}, document.title, "/");
                 updateAuthUI(authData.user);
             }
