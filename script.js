@@ -1,119 +1,89 @@
-/**
- * POKEDEX DASHBOARD SCRIPT
- * Connects dranben.com (Netlify) to Cloudflare Workers KV
- */
-
-// --- 1. CONFIGURATION ---
 const WORKER_URL = "https://pokemon.brandenkenn.workers.dev";
-const DEFAULT_TRAINER = "dranben";
+let fullCollection = []; // Persistent memory for filtering/sorting
 
-// --- 2. MAIN FETCH FUNCTION ---
 async function fetchTrainerData(username) {
-    const display = document.getElementById('pokemon-display');
     const nameEl = document.getElementById('trainer-name');
-    const balanceEl = document.getElementById('trainer-balance');
-    const totalEl = document.getElementById('trainer-total');
+    const display = document.getElementById('pokemon-display');
     
-    // Reset and show loading state
-    nameEl.innerText = "SEARCHING...";
-    display.innerHTML = '<div style="color: white; grid-column: 1/-1; text-align: center; font-family: sans-serif;">Connecting to Cloudflare KV...</div>';
-
-    // Build the URL with JSON format flag
-    const url = `${WORKER_URL}?user=${encodeURIComponent(username)}&userstats=true&format=json`;
+    nameEl.innerText = "LOADING...";
+    display.innerHTML = "";
 
     try {
-        const response = await fetch(url);
-        
-        if (!response.ok) throw new Error("Worker connection failed");
-        
+        const response = await fetch(`${WORKER_URL}?user=${username}&userstats=true&format=json`);
         const data = await response.json();
 
-        // Check if user has data (Cloudflare returns defaults if new)
-        if (!data || (data.total === 0 && (!data.collection || data.collection.length === 0))) {
+        if (data.total === 0 && data.collection.length === 0) {
             nameEl.innerText = "NOT FOUND";
-            display.innerHTML = '<div style="color: #ff4444; grid-column: 1/-1; text-align: center; padding: 20px;">Trainer has no recorded catches.</div>';
-            balanceEl.innerText = "₽0";
-            totalEl.innerText = "0";
             return;
         }
 
-        // Update UI Text
+        // Update UI
         nameEl.innerText = username.toUpperCase();
-        balanceEl.innerText = `₽${(data.balance || 0).toLocaleString()}`;
-        totalEl.innerText = data.total || 0;
-        
-        // Clear "Searching" message
-        display.innerHTML = ""; 
+        document.getElementById('trainer-balance').innerText = `₽${data.balance.toLocaleString()}`;
+        document.getElementById('trainer-total').innerText = data.total;
 
-        // Loop through collection (Last 20 catches, newest first)
-        const catches = data.collection || [];
-        catches.slice(-20).reverse().forEach(entry => {
-            
-            // --- SANITY CHECK: Ensure entry is a valid string ---
-            if (!entry || typeof entry !== 'string') return;
+        // Store and Render
+        fullCollection = data.collection || [];
+        renderSprites(fullCollection);
 
-            const isShiny = entry.includes('✨');
-            const hasPokerus = entry.includes('🦠');
-            
-            // Extract name: "Pikachu(15/15/15)" -> "pikachu"
-            let nameParts = entry.split('(');
-            if (nameParts.length === 0) return; 
-            let name = nameParts[0].replace('✨', '').toLowerCase().trim();
-
-            // ... inside your data.collection loop ...
-            const img = document.createElement('img');
-
-            // Set the source
-            img.src = `https://img.pokemondb.net/sprites/home/${isShiny ? 'shiny' : 'normal'}/${name}.png`;
-
-            // This is the "Hover" magic
-            // It sets the browser's native tooltip to show the full catch entry
-            img.title = entry; 
-            img.alt = name;
-
-            // Add a specific class so the CSS knows to style the cursor
-            img.classList.add('poke-sprite');
-
-            if (isShiny) img.classList.add('shiny-glow');
-            if (hasPokerus) img.classList.add('pokerus-border');
-
-            display.appendChild(img);
-        });
-
-    } catch (error) {
-        console.error("Dashboard Error:", error);
+    } catch (e) {
         nameEl.innerText = "ERROR";
-        display.innerHTML = `<div style="color: #ff4444; grid-column: 1/-1; text-align: center;">Worker Error: ${error.message}</div>`;
     }
 }
 
-// --- 3. SEARCH LOGIC ---
+function renderSprites(list) {
+    const display = document.getElementById('pokemon-display');
+    display.innerHTML = "";
 
-function performSearch() {
-    const input = document.getElementById('username-input');
-    const username = input.value.trim();
-    if (username) {
-        fetchTrainerData(username);
-    }
+    list.forEach(entry => {
+        if (!entry) return;
+        const isShiny = entry.includes('✨');
+        const hasPokerus = entry.includes('🦠');
+        const name = entry.split('(')[0].replace('✨', '').toLowerCase().trim();
+
+        const img = document.createElement('img');
+        img.src = `https://img.pokemondb.net/sprites/home/${isShiny ? 'shiny' : 'normal'}/${name}.png`;
+        img.title = entry;
+        if (isShiny) img.classList.add('shiny-glow');
+        if (hasPokerus) img.classList.add('pokerus-border');
+        
+        img.onerror = () => img.src = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png";
+        
+        display.appendChild(img);
+    });
 }
 
-// Listen for Search Click
-document.getElementById('search-btn').addEventListener('click', performSearch);
+// --- Interaction Listeners ---
 
-// Listen for Enter Key in search box
-document.getElementById('username-input').addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') performSearch();
+// Search for new trainer
+document.getElementById('search-btn').addEventListener('click', () => {
+    const name = document.getElementById('username-input').value.trim();
+    if (name) fetchTrainerData(name);
 });
 
-// --- 4. INITIALIZATION ---
+// Filter as you type
+document.getElementById('pokemon-filter').addEventListener('input', (e) => {
+    const term = e.target.value.toLowerCase();
+    const filtered = fullCollection.filter(item => item.toLowerCase().includes(term));
+    renderSprites(filtered);
+});
 
-// Check URL for specific user (e.g., dranben.com/?user=someone)
+// Sort dropdown
+document.getElementById('sort-order').addEventListener('change', (e) => {
+    const val = e.target.value;
+    let sorted = [...fullCollection];
+
+    if (val === "newest") sorted = [...fullCollection]; // Default is Newest (at end of array)
+    if (val === "oldest") sorted = [...fullCollection].reverse();
+    if (val === "alpha") sorted.sort((a, b) => a.localeCompare(b));
+    if (val === "shiny") sorted.sort((a, b) => b.includes('✨') - a.includes('✨'));
+
+    // Note: My renderSprites currently draws in array order. 
+    // Since your Worker pushes new catches to the END, "Newest" is actually at the bottom.
+    // To show Newest at the TOP, we should reverse the 'sorted' list before rendering.
+    renderSprites(sorted.reverse()); 
+});
+
+// Initial Load
 const urlParams = new URLSearchParams(window.location.search);
-const userFromUrl = urlParams.get('user');
-
-if (userFromUrl) {
-    fetchTrainerData(userFromUrl);
-} else {
-    // Default load
-    fetchTrainerData(DEFAULT_TRAINER);
-}
+fetchTrainerData(urlParams.get('user') || 'Branden');
