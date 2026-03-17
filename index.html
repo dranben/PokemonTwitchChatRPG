@@ -9,45 +9,53 @@
 </head>
 <body>
 
-<div id="trainer-card">
-    <nav class="pokedex-tabs">
-        <button class="tab-btn active" onclick="openTab('pokedex-view', this)">POKEDEX</button>
-        <button class="tab-btn" onclick="openTab('leaderboard-view', this)">HALL OF FAME</button>
-    </nav>
+    <div id="trainer-card">
+        <nav class="pokedex-tabs">
+            <button class="tab-btn active" onclick="openTab('pokedex-view', this)">POKEDEX</button>
+            <button class="tab-btn" onclick="openTab('leaderboard-view', this)">HALL OF FAME</button>
+        </nav>
 
-    <div id="pokedex-view" class="tab-content active">
-        <div class="search-bar">
-            <input type="text" id="username-input" placeholder="Trainer Name...">
-            <button id="search-btn">GO</button>
-        </div>
-
-        <h2 id="trainer-name">LOADING...</h2>
-        
-        <div class="stats-container">
-            <div>Cash: <span id="trainer-balance">₽0</span></div>
-            <div>Total: <span id="trainer-total">0</span></div>
-        </div>
-
-        <div class="controls-row">
-            <input type="text" id="pokemon-filter" placeholder="Filter (✨, hundo, name...)">
-            <select id="sort-order">
-                <option value="newest">Newest</option>
-                <option value="oldest">Oldest</option>
-                <option value="alpha">A-Z</option>
-                <option value="shiny">Shinies</option>
-            </select>
-        </div>
-
-        <h3>COLLECTION</h3>
-        <div id="pokemon-display"></div>
-    </div>
-
-    <div id="leaderboard-view" class="tab-content">
-        <h2 class="terminal-header">✨ GLOBAL STATS</h2>
-        <div id="leaderboard-list">
+        <div id="pokedex-view" class="tab-content active">
+            <div class="search-bar">
+                <input type="text" id="username-input" placeholder="Trainer Name...">
+                <button id="search-btn">GO</button>
             </div>
+
+            <h2 id="trainer-name">LOADING...</h2>
+            
+            <div class="stats-container">
+                <div>Cash: <span id="trainer-balance">₽0</span></div>
+                <div>Total: <span id="trainer-total">0</span></div>
+            </div>
+
+            <div class="controls-row">
+                <input type="text" id="pokemon-filter" placeholder="Filter (✨, hundo, name...)">
+                <select id="sort-order">
+                    <option value="newest">Newest</option>
+                    <option value="oldest">Oldest</option>
+                    <option value="alpha">A-Z</option>
+                    <option value="shiny">Shinies</option>
+                </select>
+            </div>
+
+            <div id="pokemon-display"></div>
+        </div>
+
+        <div id="leaderboard-view" class="tab-content">
+            <h2 class="terminal-header">RANKINGS</h2>
+            
+            <div class="sub-tabs">
+                <button class="sub-btn active" onclick="switchLeaderboard('global', this)">ALL</button>
+                <button class="sub-btn" onclick="switchLeaderboard('shinies', this)">✨</button>
+                <button class="sub-btn" onclick="switchLeaderboard('legends', this)">👑</button>
+                <button class="sub-btn" onclick="switchLeaderboard('hundos', this)">💯</button>
+                <button class="sub-btn" onclick="switchLeaderboard('nundos', this)">🤡</button>
+                <button class="sub-btn" onclick="switchLeaderboard('shundos', this)">🚨</button>
+            </div>
+
+            <div id="leaderboard-list"></div>
+        </div>
     </div>
-</div>
 
 </body>
 </html>
