@@ -197,3 +197,48 @@ body {
     gap: 12px;
     margin-top: 5px;
 }
+
+/* --- IMPROVED SUB-TAB BUTTONS --- */
+.sub-tabs {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 3 columns for better fit */
+    gap: 8px;
+    margin-bottom: 15px;
+    background: rgba(0,0,0,0.2);
+    padding: 10px;
+    border-radius: 10px;
+}
+
+.sub-btn {
+    background: #444;
+    color: #999;
+    border: none;
+    padding: 10px 5px;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 0.45rem; /* Small but readable arcade font */
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    border-bottom: 3px solid #222;
+}
+
+.sub-btn.active {
+    background: #51ff00; /* Neon Green */
+    color: #111;
+    border-bottom: 0;
+    transform: translateY(2px);
+    box-shadow: 0 0 10px rgba(81, 255, 0, 0.4);
+}
+
+.sub-btn:hover:not(.active) {
+    background: #555;
+    color: #fff;
+}
+
+/* For very small screens, drop to 2 columns */
+@media (max-width: 380px) {
+    .sub-tabs {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
