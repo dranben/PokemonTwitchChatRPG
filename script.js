@@ -139,51 +139,53 @@ function renderSprites(list) {
     display.innerHTML = "";
     if (!list) return;
 
-    // 1. IDENTITY CHECK: Are you looking at your own storage?
     const loggedInUser = localStorage.getItem('twitch_user');
     const currentTrainer = document.getElementById('trainer-name').innerText.toLowerCase();
     const isOwner = loggedInUser && loggedInUser.toLowerCase() === currentTrainer;
 
-    // Toggle the 'is-owner' class to show/hide the "X" buttons via CSS
     if (isOwner) display.classList.add('is-owner');
     else display.classList.remove('is-owner');
 
-    // 2. CLEANUP: Filter out any nulls or broken entries
     const validList = list.filter(Boolean);
 
     validList.forEach((entry) => {
-        // 3. THE FIX: Find the REAL index in the master collection 
-        // This ensures that when you click 'X', the Worker deletes the right one.
         const actualIndex = fullCollection.indexOf(entry);
-        
-        let name, isShiny, ivs;
+        let name, isShiny, atk, def, hp;
 
-        // Handle Object Format
-        if (typeof entry === 'object' && entry.n) {
+        if (typeof entry === 'object') {
             name = entry.n;
             isShiny = entry.s === 1;
-            ivs = entry.iv ? entry.iv.join('/') : '??/??/??';
-        } 
-        // Handle Legacy String Format
-        else if (typeof entry === 'string') {
-            isShiny = entry.includes('✨');
-            name = entry.split('(')[0].replace('✨', '').toLowerCase().trim();
-            ivs = entry.split('(')[1]?.replace(')', '') || '??/??/??';
+            [atk, def, hp] = entry.iv || [0,0,0];
         } else {
-            return; // Skip if it's neither
+            // Support for legacy strings
+            isShiny = entry.includes('✨');
+            name = entry.split('(')[0].replace('✨', '').trim();
+            const ivMatch = entry.match(/\((.*?)\)/);
+            [atk, def, hp] = ivMatch ? ivMatch[1].split('/').map(Number) : [0,0,0];
         }
 
-        // 4. CREATE THE CARD
         const card = document.createElement('div');
         card.className = `pokemon-card ${isShiny ? 'shiny-card' : ''}`;
         
         card.innerHTML = `
-            <button class="release-btn" title="Release ${name}" 
-                    onclick="releasePokemon(${actualIndex}, '${name}')">×</button>
+            <button class="release-btn" onclick="releasePokemon(${actualIndex}, '${name}')">×</button>
             <img src="https://img.pokemondb.net/sprites/home/${isShiny ? 'shiny' : 'normal'}/${name.toLowerCase()}.png" 
-                 alt="${name}"
                  onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png'">
-            <div class="pokemon-stats">${ivs}</div>
+            
+            <div class="stats-box">
+                <div class="stat-row">
+                    <span class="stat-label">ATK</span>
+                    <span class="stat-value ${atk === 15 ? 'perfect-stat' : ''}">${atk}</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">DEF</span>
+                    <span class="stat-value ${def === 15 ? 'perfect-stat' : ''}">${def}</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">STA</span>
+                    <span class="stat-value ${hp === 15 ? 'perfect-stat' : ''}">${hp}</span>
+                </div>
+            </div>
         `;
         
         display.appendChild(card);
