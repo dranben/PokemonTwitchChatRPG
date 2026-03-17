@@ -198,13 +198,11 @@ document.getElementById('sort-order').addEventListener('change', (e) => {
         });
     } else if (val === "shiny") {
         sorted.sort((a, b) => {
-            const isShinyA = typeof a === 'object' ? a.s : (a.includes('✨') ? 1 : 0);
-            const isShinyB = typeof b === 'object' ? b.s : (b.includes('✨') ? 1 : 0);
+            if (!a || !b) return 0;
+            const isShinyA = (typeof a === 'object') ? a.s : (String(a).includes('✨') ? 1 : 0);
+            const isShinyB = (typeof b === 'object') ? b.s : (String(b).includes('✨') ? 1 : 0);
             return isShinyB - isShinyA;
         });
-    } else if (val === "oldest") {
-        renderSprites(sorted);
-        return;
     }
 
     renderSprites(sorted); // Note: renderSprites reverses the array for display
