@@ -102,3 +102,65 @@ body {
 .pokerus-border { border: 2px solid #ff00ff !important; }
 
 h3 { color: white; font-family: 'Press Start 2P', cursive; font-size: 0.6rem; margin: 0; }
+
+/* --- UPDATED SEARCH & FILTER STYLES --- */
+
+/* The main container for all inputs */
+.search-bar, .controls-row {
+    display: flex;
+    gap: 10px;
+    background: rgba(0, 0, 0, 0.2); /* Slight dark tint */
+    padding: 12px;
+    border-radius: 12px;
+    border: 2px solid #a12308; /* Darker red border */
+    box-shadow: inset 2px 2px 5px rgba(0,0,0,0.3);
+    margin-bottom: 5px;
+}
+
+/* Base style for Text Inputs */
+#username-input, #pokemon-filter {
+    flex-grow: 1;
+    background: #e0e0e0;
+    border: 3px solid #313131;
+    border-radius: 6px;
+    padding: 10px 15px;
+    font-family: 'Roboto', sans-serif;
+    font-weight: bold;
+    color: #333;
+    outline: none;
+    transition: all 0.2s ease;
+    box-shadow: inset 1px 1px 3px rgba(0,0,0,0.2);
+}
+
+/* Focus effect: Glowing input */
+#username-input:focus, #pokemon-filter:focus {
+    background: #fff;
+    border-color: #51ff00; /* Neon green focus */
+    box-shadow: 0 0 10px rgba(81, 255, 0, 0.5);
+}
+
+/* The GO Button */
+#search-btn {
+    background: #313131;
+    color: #51ff00;
+    border: none;
+    border-radius: 6px;
+    padding: 0 20px;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 0.7rem;
+    cursor: pointer;
+    text-transform: uppercase;
+    border-bottom: 4px solid #000;
+    transition: all 0.1s active;
+}
+
+#search-btn:hover {
+    background: #444;
+    color: #fff;
+    text-shadow: 0 0 5px #51ff00;
+}
+
+#search-btn:active {
+    border-bottom-width: 0;
+    transform: translateY(4px); /* Button press feel */
+}
