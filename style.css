@@ -142,3 +142,58 @@ body {
 #search-btn:hover {
     background: #444;
     color: #
+}
+
+/* --- CLEAN & MODERN SORT DROPDOWN STYLES --- */
+
+#sort-order {
+    flex-grow: 1;
+    background-color: #313131; /* Dark Slate to match buttons */
+    color: #51ff00; /* Neon Green text */
+    border: 3px solid #111;
+    border-radius: 8px;
+    padding: 10px 15px;
+    font-family: 'Roboto', sans-serif;
+    font-weight: bold;
+    font-size: 0.85rem;
+    cursor: pointer;
+    outline: none;
+    transition: all 0.2s ease;
+    
+    /* Custom Dropdown Arrow */
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2351ff00'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 20px;
+    padding-right: 40px; /* Space for the arrow */
+    
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.4);
+}
+
+/* Hover & Focus Effects */
+#sort-order:hover {
+    background-color: #444;
+    border-color: #51ff00;
+    box-shadow: 0 0 10px rgba(81, 255, 0, 0.3);
+}
+
+#sort-order:focus {
+    border-color: #fff;
+    box-shadow: 0 0 15px rgba(81, 255, 0, 0.6);
+}
+
+/* Styling the options inside (Browser support varies) */
+#sort-order option {
+    background: #222;
+    color: #fff;
+    padding: 10px;
+}
+
+/* Aligning the Controls Row */
+.controls-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 5px;
+}
