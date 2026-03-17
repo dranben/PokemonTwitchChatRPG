@@ -250,3 +250,67 @@ body {
     opacity: 0.7;
     transition: all 0.3s;
 }
+
+/* --- ENHANCED STORAGE GRID --- */
+#pokemon-display {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 15px;
+    padding: 10px;
+}
+
+.pokemon-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid #444;
+    border-radius: 8px;
+    padding: 10px;
+    text-align: center;
+    position: relative;
+    transition: transform 0.2s, border-color 0.2s;
+}
+
+.pokemon-card:hover {
+    border-color: #51ff00;
+    transform: translateY(-3px);
+}
+
+.pokemon-card img {
+    width: 80px; /* Slightly bigger */
+    height: 80px;
+    object-fit: contain;
+}
+
+.pokemon-stats {
+    font-family: 'Press Start 2P', cursive;
+    font-size: 0.4rem;
+    color: #aaa;
+    margin-top: 8px;
+}
+
+/* --- RELEASE BUTTON --- */
+.release-btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: #ff4444;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    width: 20px;
+    height: 20px;
+    font-size: 12px;
+    cursor: pointer;
+    display: none; /* Hidden by default */
+    line-height: 18px;
+    opacity: 0.7;
+}
+
+.release-btn:hover {
+    opacity: 1;
+    background: #ff0000;
+}
+
+/* Show release button if we own the storage */
+.is-owner .release-btn {
+    display: block;
+}
