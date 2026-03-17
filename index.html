@@ -3,57 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dranben's Trainer Card</title>
+    <title>Dranben's Pokemon Storage</title>
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <script src="script.js" defer></script>
 </head>
 <body>
 
     <div id="trainer-card">
+        <div id="auth-section" style="text-align: right; margin-bottom: 10px;">
+            <button id="login-btn" onclick="loginWithTwitch()" class="sub-btn" style="width: auto; padding: 8px 15px; display: inline-block;">
+                LOGIN WITH TWITCH
+            </button>
+            <span id="user-display" style="color: #51ff00; font-family: 'Press Start 2P', cursive; font-size: 0.5rem; display: none;"></span>
+        </div>
+
         <nav class="pokedex-tabs">
-            <button class="tab-btn active" onclick="openTab('pokedex-view', this)">POKEDEX</button>
+            <button class="tab-btn active" onclick="openTab('pokedex-view', this)">STORAGE</button>
             <button class="tab-btn" onclick="openTab('leaderboard-view', this)">HALL OF FAME</button>
         </nav>
 
         <div id="pokedex-view" class="tab-content active">
             <div class="search-bar">
-                <input type="text" id="username-input" placeholder="Trainer Name...">
+                <input type="text" id="username-input" placeholder="Enter Trainer Name...">
                 <button id="search-btn">GO</button>
             </div>
 
             <h2 id="trainer-name">LOADING...</h2>
             
             <div class="stats-container">
-                <div>Cash: <span id="trainer-balance">₽0</span></div>
-                <div>Total: <span id="trainer-total">0</span></div>
+                <div>CASH: <span id="trainer-balance">₽0</span></div>
+                <div>TOTAL: <span id="trainer-total">0</span></div>
             </div>
 
             <div class="controls-row">
-                <input type="text" id="pokemon-filter" placeholder="Filter (✨, hundo, name...)">
-                    <select id="sort-order">
-                        <option value="newest">Newest</option>
-                        <option value="oldest">Oldest</option>
-                        <option value="alpha">A-Z</option>
-                        <option value="pokedex">Pokedex #</option> <option value="shiny">Shinies</option>
-                    </select>
+                <input type="text" id="pokemon-filter" placeholder="Search Collection...">
+                <select id="sort-order">
+                    <option value="newest">NEWEST</option>
+                    <option value="oldest">OLDEST</option>
+                    <option value="alpha">A-Z</option>
+                    <option value="pokedex">POKEDEX #</option>
+                    <option value="shiny">SHINIES</option>
+                </select>
             </div>
 
+            <h3 class="storage-header">DIGITAL STORAGE UNITS</h3>
             <div id="pokemon-display"></div>
         </div>
 
         <div id="leaderboard-view" class="tab-content">
             <h2 class="terminal-header">RANKINGS</h2>
             
-        <div class="sub-tabs">
-            <button class="sub-btn active" onclick="switchLeaderboard('global', this)">GLOBAL</button>
-            <button class="sub-btn" onclick="switchLeaderboard('shinies', this)">SHINIES</button>
-            <button class="sub-btn" onclick="switchLeaderboard('Legendaries', this)">LEGENDARY</button>
-            <button class="sub-btn" onclick="switchLeaderboard('hundos', this)">HUNDOS</button>
-            <button class="sub-btn" onclick="switchLeaderboard('nundos', this)">NUNDOS</button>
-            <button class="sub-btn" onclick="switchLeaderboard('shundos', this)">SHUNDOS</button>
-        </div>
+            <div class="sub-tabs">
+                <button class="sub-btn active" onclick="switchLeaderboard('global', this)">GLOBAL</button>
+                <button class="sub-btn" onclick="switchLeaderboard('shinies', this)">SHINIES</button>
+                <button class="sub-btn" onclick="switchLeaderboard('Legendaries', this)">LEGENDARIES</button>
+                <button class="sub-btn" onclick="switchLeaderboard('hundos', this)">HUNDOS</button>
+                <button class="sub-btn" onclick="switchLeaderboard('nundos', this)">NUNDOS</button>
+                <button class="sub-btn" onclick="switchLeaderboard('shundos', this)">SHUNDOS</button>
+            </div>
 
-            <div id="leaderboard-list"></div>
+            <div id="leaderboard-list">
+                </div>
         </div>
     </div>
 
