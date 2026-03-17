@@ -18,28 +18,19 @@ async function handleTwitchRedirect() {
     const code = urlParams.get('code');
 
     if (code) {
-        const loginBtn = document.getElementById('login-btn');
-        loginBtn.innerText = "VERIFYING...";
-        
         try {
             const res = await fetch(`${WORKER_URL}?login_code=${code}`);
             const authData = await res.json();
 
             if (authData.status === "success") {
+                // MATCHING THE NAMES:
                 localStorage.setItem('twitch_user', authData.user);
-                localStorage.setItem('auth_token', authData.session_token);
+                localStorage.setItem('auth_token', authData.token); // Make sure this matches the Worker's key
                 
-                // Clean URL and Refresh
                 window.history.replaceState({}, document.title, "/");
                 updateAuthUI(authData.user);
             }
-        } catch (e) {
-            console.error("Auth Error:", e);
-            loginBtn.innerText = "LOGIN FAILED";
-        }
-    } else {
-        const savedUser = localStorage.getItem('twitch_user');
-        if (savedUser) updateAuthUI(savedUser);
+        } catch (e) { console.error("Login Failed:", e); }
     }
 }
 
