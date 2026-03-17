@@ -24,189 +24,9 @@ body {
     gap: 12px;
 }
 
-/* Search & Controls */
-.search-bar, .controls-row {
-    display: flex;
-    gap: 8px;
-}
-
-#username-input, #pokemon-filter {
-    flex-grow: 1;
-    padding: 10px;
-    border-radius: 5px;
-    border: 2px solid #313131;
-}
-
-#search-btn, #sort-order {
-    background: #313131;
-    color: #51ff00;
-    border: none;
-    border-radius: 5px;
-    font-family: 'Press Start 2P', cursive;
-    font-size: 0.6rem;
-    cursor: pointer;
-}
-
-/* Green Screen */
-#trainer-name {
-    background: #313131;
-    color: #51ff00;
-    padding: 15px;
-    border-radius: 10px;
-    border: 4px solid #111;
-    text-align: center;
-    font-family: 'Press Start 2P', cursive;
-    font-size: 1rem;
-    margin: 0;
-}
-
-/* Stats */
-.stats-container {
-    background: white;
-    display: flex;
-    justify-content: space-around;
-    padding: 10px;
-    border-radius: 8px;
-    border: 3px solid #ccc;
-    font-weight: bold;
-}
-
-/* The Grid */
-#pokemon-display {
-    background: #222;
-    border: 4px solid #111;
-    border-radius: 10px;
-    padding: 15px;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
-    gap: 10px;
-    min-height: 300px;
-    max-height: 500px;
-    overflow-y: auto; /* Scrollable collection */
-}
-
-#pokemon-display img {
-    width: 100%;
-    background: #333;
-    border-radius: 50%;
-    padding: 5px;
-    border: 2px solid #444;
-    cursor: help;
-    transition: transform 0.2s;
-}
-
-#pokemon-display img:hover { transform: scale(1.2); z-index: 5; }
-
-/* Special Glows */
-.shiny-glow { filter: drop-shadow(0 0 5px gold); border: 2px solid gold !important; }
-.pokerus-border { border: 2px solid #ff00ff !important; }
-
-h3 { color: white; font-family: 'Press Start 2P', cursive; font-size: 0.6rem; margin: 0; }
-
-/* --- UPDATED SEARCH & FILTER STYLES --- */
-
-/* The main container for all inputs */
-.search-bar, .controls-row {
-    display: flex;
-    gap: 10px;
-    background: rgba(0, 0, 0, 0.2); /* Slight dark tint */
-    padding: 12px;
-    border-radius: 12px;
-    border: 2px solid #a12308; /* Darker red border */
-    box-shadow: inset 2px 2px 5px rgba(0,0,0,0.3);
-    margin-bottom: 5px;
-}
-
-/* Base style for Text Inputs */
-#username-input, #pokemon-filter {
-    flex-grow: 1;
-    background: #e0e0e0;
-    border: 3px solid #313131;
-    border-radius: 6px;
-    padding: 10px 15px;
-    font-family: 'Roboto', sans-serif;
-    font-weight: bold;
-    color: #333;
-    outline: none;
-    transition: all 0.2s ease;
-    box-shadow: inset 1px 1px 3px rgba(0,0,0,0.2);
-}
-
-/* Focus effect: Glowing input */
-#username-input:focus, #pokemon-filter:focus {
-    background: #fff;
-    border-color: #51ff00; /* Neon green focus */
-    box-shadow: 0 0 10px rgba(81, 255, 0, 0.5);
-}
-
-/* The GO Button */
-#search-btn {
-    background: #313131;
-    color: #51ff00;
-    border: none;
-    border-radius: 6px;
-    padding: 0 20px;
-    font-family: 'Press Start 2P', cursive;
-    font-size: 0.7rem;
-    cursor: pointer;
-    text-transform: uppercase;
-    border-bottom: 4px solid #000;
-    transition: all 0.1s active;
-}
-
-#search-btn:hover {
-    background: #444;
-    color: #fff;
-    text-shadow: 0 0 5px #51ff00;
-}
-
-#search-btn:active {
-    border-bottom-width: 0;
-    transform: translateY(4px); /* Button press feel */
-}
-
-#leaderboard-card {
-    background-color: #313131;
-    width: 100%;
-    max-width: 450px;
-    border-radius: 15px;
-    border: 6px solid #111;
-    padding: 20px;
-    margin-top: 20px;
-    color: #51ff00;
-    font-family: 'Press Start 2P', cursive;
-}
-
-.terminal-header {
-    font-size: 0.8rem;
-    text-align: center;
-    margin-bottom: 20px;
-    border-bottom: 2px solid #51ff00;
-    padding-bottom: 10px;
-}
-
-.leader-row {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.6rem;
-    padding: 10px 0;
-    border-bottom: 1px solid #444;
-}
-
-.leader-rank { color: gold; }
-.leader-name { color: white; }
-.leader-count { color: #51ff00; }
-
-/* --- TAB STYLES --- */
-.pokedex-tabs {
-    display: flex;
-    gap: 5px;
-    margin-bottom: 10px;
-    border-bottom: 4px solid #a12308;
-    padding-bottom: 5px;
-}
-
-.tab-btn {
+/* Tabs */
+.pokedex-tabs, .sub-tabs { display: flex; gap: 5px; margin-bottom: 10px; }
+.tab-btn, .sub-btn {
     flex: 1;
     background: #313131;
     color: #888;
@@ -215,52 +35,64 @@ h3 { color: white; font-family: 'Press Start 2P', cursive; font-size: 0.6rem; ma
     font-family: 'Press Start 2P', cursive;
     font-size: 0.55rem;
     cursor: pointer;
-    border-radius: 5px 5px 0 0;
-    transition: all 0.2s;
+    border-radius: 5px;
 }
+.tab-btn.active, .sub-btn.active { background: #51ff00; color: #313131; box-shadow: 0 0 10px #51ff00; }
+.sub-btn { font-size: 0.45rem; padding: 8px 0; background: #444; }
 
-.tab-btn.active {
-    background: #51ff00;
-    color: #313131;
-    box-shadow: 0 -3px 0 #fff;
+/* Search & Inputs */
+.search-bar, .controls-row { display: flex; gap: 8px; }
+#username-input, #pokemon-filter {
+    flex-grow: 1;
+    padding: 10px;
+    border: 3px solid #313131;
+    border-radius: 6px;
+    outline: none;
 }
+#username-input:focus, #pokemon-filter:focus { border-color: #51ff00; }
 
-/* --- TAB TOGGLING --- */
-.tab-content {
-    display: none; /* Hide by default */
-    flex-direction: column;
-    gap: 12px;
-}
-
-.tab-content.active {
-    display: flex; /* Show active tab */
-}
-
-/* Leaderboard Specific Styles */
-#leaderboard-view {
-    background: #222;
-    padding: 20px;
-    border-radius: 10px;
-    border: 4px solid #111;
-    min-height: 400px;
-}
-
-.terminal-header {
+#search-btn {
+    background: #313131;
     color: #51ff00;
+    border: none;
+    padding: 0 15px;
     font-family: 'Press Start 2P', cursive;
-    font-size: 0.8rem;
-    text-align: center;
-    margin-bottom: 20px;
+    font-size: 0.7rem;
+    border-bottom: 4px solid #000;
+    cursor: pointer;
+}
+#search-btn:active { transform: translateY(2px); border-bottom: 0; }
+
+#sort-order { background: #313131; color: white; border-radius: 5px; padding: 5px; }
+
+/* Displays */
+#trainer-name {
+    background: #313131; color: #51ff00; padding: 15px; border-radius: 10px;
+    text-align: center; font-family: 'Press Start 2P', cursive; margin: 0; border: 4px solid #111;
 }
 
+.stats-container {
+    background: white; display: flex; justify-content: space-around;
+    padding: 10px; border-radius: 8px; border: 3px solid #ccc; font-weight: bold;
+}
+
+#pokemon-display, #leaderboard-list {
+    background: #222; border: 4px solid #111; border-radius: 10px; padding: 15px;
+    min-height: 350px; max-height: 500px; overflow-y: auto;
+}
+
+#pokemon-display { display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 10px; }
+
+#pokemon-display img { width: 100%; background: #333; border-radius: 50%; padding: 5px; transition: 0.2s; cursor: help; }
+#pokemon-display img:hover { transform: scale(1.1); }
+
+.shiny-glow { filter: drop-shadow(0 0 5px gold); border: 2px solid gold !important; }
+.pokerus-border { border: 2px solid #ff00ff !important; }
+
+/* Leaderboard Rows */
 .leader-row {
-    display: flex;
-    justify-content: space-between;
-    color: white;
-    font-family: 'Press Start 2P', cursive;
-    font-size: 0.55rem;
-    padding: 15px 0;
-    border-bottom: 1px solid #444;
+    display: flex; justify-content: space-between; padding: 12px 5px;
+    border-bottom: 1px solid #333; color: white; font-family: 'Press Start 2P', cursive; font-size: 0.55rem;
 }
-
-.leader-count { color: #51ff00; }
+.rank-count { color: #51ff00; }
+.terminal-header { color: #51ff00; text-align: center; font-size: 0.8rem; font-family: 'Press Start 2P', cursive; }
