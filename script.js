@@ -118,30 +118,57 @@ function renderSprites(list) {
     display.innerHTML = "";
     if (!list) return;
 
-    // Filter out nulls/broken entries
+    // Check if the current viewer is the owner of this storage
+    const loggedInUser = localStorage.getItem('twitch_user');
+    const currentTrainer = document.getElementById('trainer-name').innerText.toLowerCase();
+    const isOwner = loggedInUser && loggedInUser.toLowerCase() === currentTrainer;
+
+    if (isOwner) display.classList.add('is-owner');
+    else display.classList.remove('is-owner');
+
     const validList = list.filter(Boolean);
 
-    // REMOVED .reverse() here so it follows the sort order
-    validList.forEach(entry => {
-        let name, isShiny, title;
+    validList.reverse().forEach((entry, index) => {
+        const actualIndex = (validList.length - 1) - index; // Map back to original array index
+        let name, isShiny, ivs, id;
 
-        if (typeof entry === 'object' && entry.n) {
+        if (typeof entry === 'object') {
             name = entry.n.toLowerCase();
             isShiny = entry.s === 1;
-            title = `${isShiny ? '✨' : ''}${entry.n} (${entry.iv.join('/')})`;
-        } else if (typeof entry === 'string') {
+            ivs = entry.iv ? entry.iv.join('/') : '??/??/??';
+        } else {
+            // Support legacy strings during migration
             isShiny = entry.includes('✨');
             name = entry.split('(')[0].replace('✨', '').toLowerCase().trim();
-            title = entry;
-        } else { return; }
+            ivs = entry.split('(')[1]?.replace(')', '') || '??/??/??';
+        }
 
-        const img = document.createElement('img');
-        img.src = `https://img.pokemondb.net/sprites/home/${isShiny ? 'shiny' : 'normal'}/${name}.png`;
-        img.title = title;
-        if (isShiny) img.classList.add('shiny-glow');
-        img.onerror = () => img.src = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png";
-        display.appendChild(img);
+        const card = document.createElement('div');
+        card.className = `pokemon-card ${isShiny ? 'shiny-card' : ''}`;
+        
+        card.innerHTML = `
+            <button class="release-btn" onclick="releasePokemon(${actualIndex}, '${entry.n}')">×</button>
+            <img src="https://img.pokemondb.net/sprites/home/${isShiny ? 'shiny' : 'normal'}/${name}.png" 
+                 title="${entry.n}" 
+                 onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png'">
+            <div class="pokemon-stats">${ivs}</div>
+        `;
+        
+        display.appendChild(card);
     });
+}
+
+async function releasePokemon(index, name) {
+    if (!confirm(`Are you sure you want to release your ${name}? This cannot be undone.`)) return;
+
+    const token = localStorage.getItem('auth_token');
+    const user = localStorage.getItem('twitch_user');
+
+    const res = await fetch(`${WORKER_URL}?user=${user}&release_index=${index}&token=${token}`);
+    const result = await res.text();
+
+    alert(result);
+    fetchTrainerData(user); // Refresh the display
 }
 
 async function loadShinyLeaderboard() {
