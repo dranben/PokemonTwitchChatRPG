@@ -128,27 +128,13 @@ document.getElementById('sort-order').addEventListener('change', async (e) => {
     } else if (val === "shiny") {
         sorted.sort((a, b) => b.includes('✨') - a.includes('✨'));
     } else if (val === "pokedex") {
-        // Pokedex sort requires a bit more heavy lifting
-        document.getElementById('pokemon-display').classList.add('sorting-blur');
-        document.getElementById('trainer-name').innerText = "SORTING...";
-        
-        // Create a map of names to IDs to avoid duplicate API calls
-        const nameToId = {};
-        for (let entry of sorted) {
-            const name = entry.split('(')[0].replace('✨', '').toLowerCase().trim();
-            if (!nameToId[name]) {
-                const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${name}`);
-                const d = await res.json();
-                nameToId[name] = d.id;
-        document.getElementById('pokemon-display').classList.remove('sorting-blur');
-            }
-        }
-        
         sorted.sort((a, b) => {
-            const nameA = a.split('(')[0].replace('✨', '').toLowerCase().trim();
-            const nameB = b.split('(')[0].replace('✨', '').toLowerCase().trim();
-            return nameToId[nameA] - nameToId[nameB];
-        });
+        // Handle objects vs legacy strings
+        const idA = typeof a === 'object' ? a.id : 9999;
+        const idB = typeof b === 'object' ? b.id : 9999;
+        return idA - idB;
+    });
+    }
         
         document.getElementById('trainer-name').innerText = "DRANBEN"; // Reset title
     }
