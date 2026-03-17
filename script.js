@@ -86,4 +86,4 @@ document.getElementById('sort-order').addEventListener('change', (e) => {
 
 // Initial Load
 const urlParams = new URLSearchParams(window.location.search);
-fetchTrainerData(urlParams.get('user') || 'Branden');
+fetchTrainerData(urlParams.get('user') || 'dranben');
