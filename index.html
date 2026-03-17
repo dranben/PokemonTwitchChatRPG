@@ -9,7 +9,13 @@
 </head>
 <body>
 
-    <div id="trainer-card">
+<div id="trainer-card">
+    <nav class="pokedex-tabs">
+        <button class="tab-btn active" onclick="openTab('pokedex-view')">POKEDEX</button>
+        <button class="tab-btn" onclick="openTab('leaderboard-view')">HALL OF FAME</button>
+    </nav>
+
+    <div id="pokedex-view" class="tab-content active">
         <div class="search-bar">
             <input type="text" id="username-input" placeholder="Trainer Name...">
             <button id="search-btn">GO</button>
@@ -36,12 +42,12 @@
         <div id="pokemon-display"></div>
     </div>
 
-    <div id="leaderboard-card">
-        <h2 class="terminal-header">✨ SHINY HALL OF FAME</h2>
+    <div id="leaderboard-view" class="tab-content">
+        <h2 class="terminal-header">✨ GLOBAL STATS</h2>
         <div id="leaderboard-list">
-            <div class="leader-row">Loading legends...</div>
-        </div>
+            </div>
     </div>
+</div>
 
 </body>
 </html>
