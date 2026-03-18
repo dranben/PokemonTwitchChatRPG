@@ -336,16 +336,16 @@ header {
 /* The Star Button Base Styling */
 .fav-btn {
     position: absolute;
-    bottom: 8px;
-    right: 8px;
+    top: 8px;      /* Moved from bottom to top */
+    left: 8px;     /* Moved from right to left */
     background: none;
     border: none;
-    color: #444; /* Dark grey by default */
-    font-size: 1.8rem; /* INCREASED SIZE (was 1.2rem) */
+    color: #444; 
+    font-size: 1.8rem; 
     cursor: pointer;
     display: none; 
     z-index: 10;
-    transition: all 0.2s ease; /* Smooth scaling */
+    transition: all 0.2s ease; 
 }
 
 /* Hover effect */
