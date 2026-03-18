@@ -765,3 +765,71 @@ header {
 .detail-card-inner.is-shiny .close-btn:hover {
     color: #ffd700;
 }
+
+/* --- EXPANDED CARD HOLO SHEEN --- */
+
+/* This creates the invisible layer that will hold the light beam */
+.detail-card-inner {
+    position: relative;
+    overflow: hidden; /* CRITICAL: Keeps the light beam inside the card */
+}
+
+.detail-card-inner::after {
+    content: "";
+    position: absolute;
+    top: -100%;
+    left: -100%;
+    width: 300%;
+    height: 300%;
+    
+    /* The Light Beam (A slanted white gradient) */
+    background: linear-gradient(
+        135deg, 
+        rgba(255, 255, 255, 0) 40%, 
+        rgba(255, 255, 255, 0.15) 45%, 
+        rgba(255, 255, 255, 0.4) 50%, 
+        rgba(255, 255, 255, 0.15) 55%, 
+        rgba(255, 255, 255, 0) 60%
+    );
+    
+    transform: rotate(25deg);
+    pointer-events: none; /* Let clicks pass through */
+    opacity: 0;
+}
+
+/* When the card is 'shown', trigger a one-time sweep of light */
+.detail-card-inner.show::after {
+    animation: holo-sweep 1.2s ease-out forwards;
+    animation-delay: 0.4s; /* Wait for the flip to finish before sweeping */
+}
+
+@keyframes holo-sweep {
+    0% {
+        top: -150%;
+        left: -150%;
+        opacity: 0;
+    }
+    10% {
+        opacity: 1;
+    }
+    80% {
+        opacity: 1;
+    }
+    100% {
+        top: 100%;
+        left: 100%;
+        opacity: 0;
+    }
+}
+
+/* SHINY SPECIAL: If it's a shiny, make the sheen even brighter/golden */
+.detail-card-inner.is-shiny::after {
+    background: linear-gradient(
+        135deg, 
+        rgba(255, 255, 255, 0) 40%, 
+        rgba(255, 215, 0, 0.2) 45%, 
+        rgba(255, 255, 255, 0.6) 50%, 
+        rgba(255, 215, 0, 0.2) 55%, 
+        rgba(255, 255, 255, 0) 60%
+    );
+}
