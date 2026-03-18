@@ -766,70 +766,70 @@ header {
     color: #ffd700;
 }
 
-/* --- EXPANDED CARD HOLO SHEEN --- */
+/* --- REFINED HOLO SHEEN --- */
 
-/* This creates the invisible layer that will hold the light beam */
 .detail-card-inner {
     position: relative;
-    overflow: hidden; /* CRITICAL: Keeps the light beam inside the card */
+    overflow: hidden; /* This MUST be here to clip the beam */
+    z-index: 1; /* Sets a base layer */
 }
 
+/* The Light Beam Layer */
 .detail-card-inner::after {
     content: "";
     position: absolute;
-    top: -100%;
-    left: -100%;
-    width: 300%;
-    height: 300%;
+    top: -150%;
+    left: -150%;
+    width: 400%; /* Wider beam for faster sweep */
+    height: 400%;
     
-    /* The Light Beam (A slanted white gradient) */
+    /* Stronger, more visible gradient */
     background: linear-gradient(
         135deg, 
-        rgba(255, 255, 255, 0) 40%, 
-        rgba(255, 255, 255, 0.15) 45%, 
-        rgba(255, 255, 255, 0.4) 50%, 
-        rgba(255, 255, 255, 0.15) 55%, 
-        rgba(255, 255, 255, 0) 60%
+        transparent 45%, 
+        rgba(255, 255, 255, 0.1) 48%, 
+        rgba(255, 255, 255, 0.6) 50%, 
+        rgba(255, 255, 255, 0.1) 52%, 
+        transparent 55%
     );
     
     transform: rotate(25deg);
-    pointer-events: none; /* Let clicks pass through */
+    pointer-events: none;
+    z-index: 99; /* FORCE TO THE FRONT: Sits on top of the image and text */
     opacity: 0;
 }
 
-/* When the card is 'shown', trigger a one-time sweep of light */
+/* Trigger the sweep when the card flips open */
 .detail-card-inner.show::after {
-    animation: holo-sweep 1.2s ease-out forwards;
-    animation-delay: 0.4s; /* Wait for the flip to finish before sweeping */
+    animation: holo-sweep 1.5s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+    animation-delay: 0.5s; /* Wait for the 3D flip to finish */
 }
 
 @keyframes holo-sweep {
     0% {
-        top: -150%;
-        left: -150%;
+        transform: translate(-20%, -20%) rotate(25deg);
         opacity: 0;
     }
-    10% {
+    20% {
         opacity: 1;
     }
     80% {
         opacity: 1;
     }
     100% {
-        top: 100%;
-        left: 100%;
+        transform: translate(30%, 30%) rotate(25deg);
         opacity: 0;
     }
 }
 
-/* SHINY SPECIAL: If it's a shiny, make the sheen even brighter/golden */
+/* SHINY VERSION: Golden Sheen */
 .detail-card-inner.is-shiny::after {
     background: linear-gradient(
         135deg, 
-        rgba(255, 255, 255, 0) 40%, 
-        rgba(255, 215, 0, 0.2) 45%, 
-        rgba(255, 255, 255, 0.6) 50%, 
-        rgba(255, 215, 0, 0.2) 55%, 
-        rgba(255, 255, 255, 0) 60%
+        transparent 45%, 
+        rgba(255, 215, 0, 0.2) 48%, 
+        rgba(255, 255, 255, 0.8) 50%, 
+        rgba(255, 215, 0, 0.2) 52%, 
+        transparent 55%
     );
 }
