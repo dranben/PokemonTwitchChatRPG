@@ -234,7 +234,8 @@ async function releasePokemon(index, name) {
         return;
     }
 
-    if (!confirm(`Are you sure you want to release your ${name}? This cannot be undone.`)) return;
+    const isSure = await customConfirm(`Are you sure you want to release ${name}? This cannot be undone.`);
+    if (!isSure) return;
 
     try {
         const res = await fetch(`${WORKER_URL}?user=${user}&release_index=${index}&token=${token}`);
@@ -247,18 +248,21 @@ async function releasePokemon(index, name) {
     }
 }
 
-function toggleFavoriteDialog(index) {
-    if (index === -1) return; // Safety net
+async function toggleFavoriteDialog(index) {
+    if (index === -1) return; 
     const poke = fullCollection[index];
 
     // 1. CHECK IF ALREADY FAVORITED (The Un-favorite trigger)
     if (poke.fav !== undefined && poke.fav >= 0 && poke.fav <= 3) {
-        if (confirm(`Are you sure you want to unfavorite ${poke.n}?`)) {
+        
+        // ---> THIS IS THE NEW CUSTOM BOX <---
+        const isSure = await customConfirm(`Are you sure you want to unfavorite ${poke.n}?`);
+        
+        if (isSure) {
             updateFavorite(-1, index);
         }
-        return; // Stop the code here so it doesn't try to add it again
+        return; 
     }
-
     // 2. ADD NEW FAVORITE LOGIC
     let availableSlot = -1;
 
@@ -406,5 +410,30 @@ if (sortOrder) {
             });
         }
         renderSprites(sorted);
+    });
+}
+
+// --- CUSTOM MODAL ENGINE ---
+function customConfirm(message) {
+    return new Promise((resolve) => {
+        const modal = document.getElementById('custom-modal');
+        const modalText = document.getElementById('modal-text');
+        const btnYes = document.getElementById('modal-btn-yes');
+        const btnNo = document.getElementById('modal-btn-no');
+
+        // Set the text and show the box
+        modalText.innerText = message;
+        modal.classList.remove('hidden');
+
+        // Cleanup function hides the box after a click
+        const cleanup = () => {
+            modal.classList.add('hidden');
+            btnYes.onclick = null;
+            btnNo.onclick = null;
+        };
+
+        // If they click YES, resolve true. If NO, resolve false.
+        btnYes.onclick = () => { cleanup(); resolve(true); };
+        btnNo.onclick = () => { cleanup(); resolve(false); };
     });
 }
