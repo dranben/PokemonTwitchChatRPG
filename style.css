@@ -747,3 +747,21 @@ header {
     color: #fff !important;
 }
 
+/* --- SHINY EXPANDED VIEW --- */
+
+/* Changes the border and glow to Golden Yellow */
+.detail-card-inner.is-shiny {
+    border-color: #ffd700;
+    box-shadow: 0 0 50px rgba(255, 215, 0, 0.6);
+}
+
+/* Optional: Make the Name and Stats text yellow to match */
+.detail-card-inner.is-shiny .pokemon-name {
+    color: #ffd700;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+/* Optional: Make the Close button (X) yellow too */
+.detail-card-inner.is-shiny .close-btn:hover {
+    color: #ffd700;
+}
