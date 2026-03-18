@@ -147,6 +147,8 @@ function renderSprites(list) {
             <button class="release-btn" title="Release ${name}" 
                     onclick="releasePokemon(${actualIndex}, '${name}')">×</button>
             
+            <div class="pokemon-name">${name.toUpperCase()}</div>
+            
             <img src="https://img.pokemondb.net/sprites/home/${isShiny ? 'shiny' : 'normal'}/${name.toLowerCase()}.png" 
                  alt="${name}"
                  onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png'">
