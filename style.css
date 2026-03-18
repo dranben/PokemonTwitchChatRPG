@@ -618,3 +618,90 @@ header {
 .type-dark { background-color: #705848; }
 .type-steel { background-color: #B7B7CE; }
 .type-fairy { background-color: #D685AD; }
+
+/* --- INFO DRAWER --- */
+.drawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 320px;
+    height: 100%;
+    background: #0a0a0a;
+    border-left: 2px solid #51ff00;
+    box-shadow: -10px 0 30px rgba(0,0,0,0.8);
+    z-index: 10000;
+    transition: transform 0.4s cubic-bezier(0.075, 0.82, 0.165, 1);
+}
+
+.drawer.hidden {
+    transform: translateX(100%); /* Hides it off-screen to the right */
+}
+
+.drawer-content {
+    padding: 30px;
+    font-family: 'Press Start 2P', cursive;
+}
+
+.info-section h3 {
+    font-size: 0.7rem;
+    color: #fff;
+    border-bottom: 1px solid #333;
+    padding-bottom: 10px;
+    margin-top: 30px;
+}
+
+.command-list {
+    list-style: none;
+    padding: 0;
+    font-size: 0.55rem;
+    line-height: 2;
+}
+
+.command-list span {
+    color: #51ff00;
+}
+
+.streamer-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.streamer-link a {
+    color: #9146ff; /* Twitch Purple */
+    text-decoration: none;
+    font-size: 0.65rem;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    background: #51ff00;
+    border-radius: 50%;
+    box-shadow: 0 0 5px #51ff00;
+}
+
+/* Floating Action Button */
+.info-fab {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    background: #111;
+    border: 2px solid #51ff00;
+    color: #51ff00;
+    border-radius: 50%;
+    font-family: 'Press Start 2P', cursive;
+    cursor: pointer;
+    z-index: 999;
+    box-shadow: 0 0 15px rgba(81, 255, 0, 0.3);
+    transition: 0.2s;
+}
+
+.info-fab:hover {
+    transform: scale(1.1);
+    background: #51ff00;
+    color: #000;
+}
