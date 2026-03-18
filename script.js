@@ -342,29 +342,83 @@ function showSuccessModal(message) {
     });
 }
 
-async function openDetailModal(poke) {
-    const m = document.getElementById('detail-modal'), i = document.getElementById('detail-card-inner');
-    const isShiny = poke.s === 1;
+async function openDetailModal(pokeData) {
+    // 1. Get UI Elements
+    const modal = document.getElementById('detail-modal');
+    const innerCard = document.getElementById('detail-card-inner');
+    const dexElement = document.getElementById('detail-dex-entry');
+    const typesContainer = document.getElementById('detail-types');
+    const closeBtn = document.getElementById('close-detail');
+
+    if (!modal || !innerCard) {
+        console.error("Modal elements not found in HTML!");
+        return;
+    }
+
+    // 2. Setup Closing Logic (Safe & Early)
+    const close = () => {
+        innerCard.classList.remove('show');
+        setTimeout(() => modal.classList.add('hidden'), 400);
+    };
+    closeBtn.onclick = close;
+    modal.onclick = (e) => { if (e.target === modal) close(); };
+
+    // 3. Populate Basic Data (Pre-Fetch)
+    const isShiny = pokeData.s === 1;
+    const name = pokeData.n || "Unknown";
+    const id = pokeData.id || 0;
+
+    // Apply the Shiny Glow class to the expanded card
     if (isShiny) {
         innerCard.classList.add('is-shiny');
     } else {
         innerCard.classList.remove('is-shiny');
     }
-    document.getElementById('detail-name').innerText = poke.n.toUpperCase() + (isShiny ? " ✨" : "");
-    document.getElementById('detail-img').src = `https://img.pokemondb.net/sprites/home/${isShiny ? 'shiny' : 'normal'}/${poke.n.toLowerCase()}.png`;
-    const [a, d, h] = poke.iv || [0,0,0];
-    document.getElementById('detail-atk').innerText = a; document.getElementById('detail-def').innerText = d; document.getElementById('detail-hp').innerText = h;
-    m.classList.remove('hidden'); setTimeout(() => i.classList.add('show'), 10);
-    try {
-        const [sR, pR] = await Promise.all([fetch(`https://pokeapi.co/api/v2/pokemon-species/${poke.id || poke.n.toLowerCase()}`), fetch(`https://pokeapi.co/api/v2/pokemon/${poke.id || poke.n.toLowerCase()}`)]);
-        const sD = await sR.json(), pD = await pR.json();
-        const tC = document.getElementById('detail-types'); tC.innerHTML = "";
-        pD.types.forEach(t => tC.innerHTML += `<span class="type-bubble type-${t.type.name}">${t.type.name}</span>`);
-        const e = sD.flavor_text_entries.find(f => f.language.name === "en");
-        document.getElementById('detail-dex-entry').innerText = e ? `"${e.flavor_text.replace(/\f|\n/g, ' ')}"` : "No data.";
-    } catch { document.getElementById('detail-dex-entry').innerText = "Error loading dex."; }
-    document.getElementById('close-detail').onclick = () => { i.classList.remove('show'); setTimeout(() => m.classList.add('hidden'), 400); };
-}
 
+    document.getElementById('detail-name').innerText = name.toUpperCase() + (isShiny ? " ✨" : "");
+    document.getElementById('detail-img').src = `https://img.pokemondb.net/sprites/home/${isShiny ? 'shiny' : 'normal'}/${name.toLowerCase()}.png`;
+    
+    const [atk, def, hp] = pokeData.iv || [0, 0, 0];
+    document.getElementById('detail-atk').innerText = atk;
+    document.getElementById('detail-def').innerText = def;
+    document.getElementById('detail-hp').innerText = hp;
+    
+    // Set loading states
+    if (dexElement) dexElement.innerText = "Accessing global Pokédex...";
+    if (typesContainer) typesContainer.innerHTML = "";
+
+    // 4. Trigger the Flip Animation
+    modal.classList.remove('hidden');
+    setTimeout(() => innerCard.classList.add('show'), 10);
+
+    // 5. Fetch Live API Data (Types & Lore)
+    try {
+        const query = id || name.toLowerCase();
+        const [speciesRes, pokemonRes] = await Promise.all([
+            fetch(`https://pokeapi.co/api/v2/pokemon-species/${query}`),
+            fetch(`https://pokeapi.co/api/v2/pokemon/${query}`)
+        ]);
+        
+        const speciesData = await speciesRes.json();
+        const pokemonData = await pokemonRes.json();
+        
+        // Build Type Bubbles
+        if (typesContainer) {
+            typesContainer.innerHTML = "";
+            pokemonData.types.forEach(t => {
+                typesContainer.innerHTML += `<span class="type-bubble type-${t.type.name}">${t.type.name}</span>`;
+            });
+        }
+
+        // Find English Pokedex Entry
+        const entry = speciesData.flavor_text_entries.find(f => f.language.name === "en");
+        if (dexElement) {
+            dexElement.innerText = entry ? `"${entry.flavor_text.replace(/\f|\n/g, ' ')}"` : "No entry found.";
+        }
+    } catch (e) {
+        console.error("Dex Fetch Error:", e);
+        if (dexElement) dexElement.innerText = "Error: Database connection lost.";
+    }
+}
 document.getElementById('open-drawer').onclick = () => document.getElementById('info-drawer').classList.remove('hidden');
 document.getElementById('close-drawer').onclick = () => document.getElementById('info-drawer').classList.add('hidden');
