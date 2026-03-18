@@ -94,3 +94,27 @@
     </div>
 </body>
 </html>
+
+<div id="detail-modal" class="modal-overlay hidden">
+    <div class="detail-card-container">
+        <div id="detail-card-inner" class="detail-card-inner">
+            <button id="close-detail" class="close-btn">×</button>
+            <h2 id="detail-name" class="pokemon-name" style="font-size: 1.2rem; margin-top: 15px;">NAME</h2>
+            <img id="detail-img" src="" alt="pokemon">
+            
+            <div class="stats-box" style="margin: 15px auto; width: 80%;">
+                <div class="stat-row">
+                    <span class="stat-label">ATK</span><span id="detail-atk" class="stat-value"></span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">DEF</span><span id="detail-def" class="stat-value"></span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">STA</span><span id="detail-hp" class="stat-value"></span>
+                </div>
+            </div>
+            
+            <p id="detail-dex-entry" class="dex-entry">Accessing Pokédex database...</p>
+        </div>
+    </div>
+</div>
