@@ -3,69 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dranben's Pokemon Storage</title>
+    <title>Trainer Storage | Dranben.com</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-    <script src="script.js" defer></script>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 </head>
 <body>
 
-    <div id="trainer-card">
-        <div id="auth-section" style="text-align: right; margin-bottom: 10px;">
-            <button id="login-btn" onclick="loginWithTwitch()" class="sub-btn" style="width: auto; padding: 8px 15px; display: inline-block;">
-                LOGIN WITH TWITCH
-            </button>
-            <span id="user-display" style="color: #51ff00; font-family: 'Press Start 2P', cursive; font-size: 0.5rem; display: none;"></span>
-        </div>
-
-        <nav class="pokedex-tabs">
-            <button class="tab-btn active" onclick="openTab('pokedex-view', this)">STORAGE</button>
-            <button class="tab-btn" onclick="openTab('leaderboard-view', this)">HALL OF FAME</button>
-        </nav>
-
-        <div id="pokedex-view" class="tab-content active">
-            <div class="search-bar">
-                <input type="text" id="username-input" placeholder="Enter Trainer Name...">
-                <button id="search-btn">GO</button>
-            </div>
-
-            <h2 id="trainer-name">LOADING...</h2>
-            
-            <div class="stats-container">
-                <div>CASH: <span id="trainer-balance">₽0</span></div>
-                <div>TOTAL: <span id="trainer-total">0</span></div>
-            </div>
-
-            <div class="controls-row">
-                <input type="text" id="pokemon-filter" placeholder="Search Collection...">
-                <select id="sort-order">
-                    <option value="newest">NEWEST</option>
-                    <option value="oldest">OLDEST</option>
-                    <option value="alpha">A-Z</option>
-                    <option value="pokedex">POKEDEX #</option>
-                    <option value="shiny">SHINIES</option>
-                </select>
+    <header>
+        <div class="header-container">
+            <div id="auth-section">
+                <button id="login-btn" onclick="window.location.href='https://id.twitch.tv/oauth2/authorize?client_id=oqdrp3gkw3lczkb14z6h74ycboupib&redirect_uri=https://dranben.com&response_type=code&scope=user:read:email'">
+                    LOGIN WITH TWITCH
+                </button>
+                <span id="user-display" style="display:none;"></span>
             </div>
             
-            <div id="pokemon-display"></div>
-        </div>
-
-        <div id="leaderboard-view" class="tab-content">
-            <h2 class="terminal-header">RANKINGS</h2>
-            
-            <div class="sub-tabs">
-                <button class="sub-btn active" onclick="switchLeaderboard('global', this)">GLOBAL</button>
-                <button class="sub-btn" onclick="switchLeaderboard('shinies', this)">SHINIES</button>
-                <button class="sub-btn" onclick="switchLeaderboard('Legendaries', this)">LEGENDARIES</button>
-                <button class="sub-btn" onclick="switchLeaderboard('hundos', this)">HUNDOS</button>
-                <button class="sub-btn" onclick="switchLeaderboard('nundos', this)">NUNDOS</button>
-                <button class="sub-btn" onclick="switchLeaderboard('shundos', this)">SHUNDOS</button>
+            <div class="search-trainer">
+                <input type="text" id="username-input" placeholder="Search Trainer Name...">
+                <button onclick="fetchTrainerData(document.getElementById('username-input').value)">GO</button>
             </div>
-
-            <div id="leaderboard-list">
-                </div>
         </div>
-    </div>
+    </header>
 
+    <main id="trainer-card">
+        <div class="card-header">
+            <h1 id="trainer-name">DRANBEN</h1>
+            <p class="subtitle">DIGITAL STORAGE SYSTEM v2.0</p>
+        </div>
+
+        <div class="controls-row">
+            <input type="text" id="pokemon-filter" placeholder="Filter by Name...">
+            <select id="sort-order">
+                <option value="newest">Newest First</option>
+                <option value="oldest">Oldest First</option>
+                <option value="pokedex">Pokédex #</option>
+                <option value="alpha">A-Z</option>
+                <option value="shiny">Shinies</option>
+            </select>
+        </div>
+
+        <hr class="divider">
+
+        <div id="pokemon-display"></div>
+    </main>
+
+    <script src="script.js"></script>
 </body>
 </html>
