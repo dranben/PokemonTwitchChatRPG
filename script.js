@@ -87,10 +87,9 @@ async function fetchTrainerData(username) {
         
         if (statTotal) statTotal.innerText = data.total || 0;
         if (statBalance) statBalance.innerText = data.balance?.toLocaleString() || 0;
-        
-        updateFavoriteUI(data.favorites);
-        
+
         fullCollection = (data.collection || []).filter(Boolean);
+        updateFavoriteUI(data.favorites);
         
         // Use mapping to preserve original index before reversing
         const displayList = fullCollection.map((poke, index) => {
@@ -106,6 +105,11 @@ async function fetchTrainerData(username) {
 
 // --- 4. FAVORITES UI UPDATER ---
 function updateFavoriteUI(favorites) {
+    const loggedInUser = localStorage.getItem('twitch_user');
+    const trainerNameSpan = document.getElementById('trainer-name');
+    const currentTrainer = trainerNameSpan ? trainerNameSpan.innerText.toLowerCase() : '';
+    const isOwner = loggedInUser && loggedInUser.toLowerCase() === currentTrainer;
+
     for (let i = 0; i < 4; i++) {
         const slotDiv = document.getElementById(`fav-${i}`);
         if (!slotDiv) continue;
@@ -117,8 +121,12 @@ function updateFavoriteUI(favorites) {
             const name = data.n;
             const [atk, def, hp] = data.iv || [0, 0, 0];
             const imgSrc = `https://img.pokemondb.net/sprites/home/${isShiny ? 'shiny' : 'normal'}/${name.toLowerCase()}.png`;
+            
+            // Smart Search: Find this exact Pokemon in the master list using its 'fav' tag
+            const pokeIndex = fullCollection.findIndex(p => p.fav === i);
 
             slotDiv.innerHTML = `
+                ${isOwner ? `<button class="fav-btn active" title="Remove Favorite" onclick="toggleFavoriteDialog(${pokeIndex})">★</button>` : ''}
                 <div class="fav-name ${isShiny ? 'shiny-text' : ''}">${name.toUpperCase()}</div>
                 <img src="${imgSrc}" alt="${name}">
                 <div class="fav-stats">
@@ -240,25 +248,33 @@ async function releasePokemon(index, name) {
 }
 
 function toggleFavoriteDialog(index) {
+    if (index === -1) return; // Safety net
+    const poke = fullCollection[index];
+
+    // 1. CHECK IF ALREADY FAVORITED (The Un-favorite trigger)
+    if (poke.fav !== undefined && poke.fav >= 0 && poke.fav <= 3) {
+        if (confirm(`Are you sure you want to unfavorite ${poke.n}?`)) {
+            updateFavorite(-1, index);
+        }
+        return; // Stop the code here so it doesn't try to add it again
+    }
+
+    // 2. ADD NEW FAVORITE LOGIC
     let availableSlot = -1;
 
-    // 1. Check all 4 slots to see if any are holding the default Poke-ball
     for (let i = 0; i < 4; i++) {
         const img = document.querySelector(`#fav-${i} img`);
         if (img && img.src.includes('poke-ball.png')) {
             availableSlot = i;
-            break; // Stop looking once we find the first empty one
+            break; 
         }
     }
 
-    // 2. If we found an empty slot, automatically use it!
     if (availableSlot !== -1) {
         updateFavorite(availableSlot, index);
-    } 
-    // 3. If all 4 are full, fall back to asking them which one to overwrite
-    else {
+    } else {
         const slotInput = prompt("Your favorites are full! Which slot (1, 2, 3, or 4) would you like to replace?");
-        if (!slotInput) return; // User cancelled
+        if (!slotInput) return; 
         
         const slotNum = parseInt(slotInput);
         if (isNaN(slotNum) || slotNum < 1 || slotNum > 4) {
