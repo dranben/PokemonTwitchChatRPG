@@ -510,3 +510,69 @@ header {
     padding: 15px 0;
     font-size: 1rem;
 }
+
+/* --- POKEDEX DETAIL MODAL & FLIP ANIMATION --- */
+.detail-card-container {
+    perspective: 1000px; /* Gives the flip a 3D depth effect */
+    width: 90%;
+    max-width: 380px;
+}
+
+.detail-card-inner {
+    background: #111;
+    border: 3px solid #51ff00;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 0 40px rgba(81, 255, 0, 0.4);
+    position: relative;
+    
+    /* The Animation starting state */
+    transform-style: preserve-3d;
+    transform: rotateY(-90deg) scale(0.5); 
+    opacity: 0;
+    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Creates a bouncy spring effect */
+}
+
+/* When we add this class via JS, it springs forward */
+.detail-card-inner.show {
+    transform: rotateY(0deg) scale(1);
+    opacity: 1;
+}
+
+.close-btn {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    background: none;
+    border: none;
+    color: #444;
+    font-size: 2rem;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.close-btn:hover {
+    color: #ff3333;
+    transform: scale(1.2);
+}
+
+#detail-img {
+    width: 150px;
+    height: 150px;
+    object-fit: contain;
+    filter: drop-shadow(0 0 10px rgba(255,255,255,0.2));
+}
+
+.dex-entry {
+    color: #aaa;
+    font-size: 0.75rem;
+    line-height: 1.6;
+    background: #222;
+    padding: 15px;
+    border-radius: 8px;
+    font-style: italic;
+    font-family: sans-serif; /* Standard font makes paragraphs easier to read */
+    border-left: 4px solid #51ff00;
+    text-align: left;
+}
