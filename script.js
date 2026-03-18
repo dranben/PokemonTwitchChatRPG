@@ -257,15 +257,41 @@ async function updateFavorite(slot, pokeIndex) {
     const user = localStorage.getItem('twitch_user');
     const token = localStorage.getItem('auth_token');
     
+    // --- 1. OPTIMISTIC UI UPDATE (Instant Visuals) ---
+    const targetPoke = fullCollection[pokeIndex];
+
+    if (slot === -1) {
+        // Un-favoriting: Remove the tag from the local memory
+        delete targetPoke.fav;
+    } else {
+        // Favoriting: Strip this slot from anyone else, then assign it
+        fullCollection.forEach(p => { if (p.fav === slot) delete p.fav; });
+        targetPoke.fav = slot;
+    }
+
+    // Instantly rebuild the top bar without waiting for the server
+    const tempFavorites = [null, null, null, null];
+    fullCollection.forEach(p => {
+        if (p.fav !== undefined && p.fav >= 0 && p.fav <= 3) {
+            tempFavorites[p.fav] = p;
+        }
+    });
+    
+    // Redraw the 4 slots instantly
+    updateFavoriteUI(tempFavorites);
+
+    // --- 2. BACKGROUND DATABASE SAVE ---
     try {
+        // Send the request quietly in the background
         const res = await fetch(`${WORKER_URL}?user=${user}&set_favorite=true&slot=${slot}&index=${pokeIndex}&token=${token}`);
-        if (res.ok) {
-            alert("Favorite set!");
-            const currentTrainer = document.getElementById('trainer-name').innerText.toLowerCase();
-            fetchTrainerData(currentTrainer); 
+        
+        if (!res.ok) {
+            // If the server rejects it (e.g., token expired), revert the UI by doing a hard refresh
+            console.error("Server rejected favorite save.");
+            fetchTrainerData(user); 
         }
     } catch (e) {
-        console.error("Favorite setting failed:", e);
+        console.error("Network error while saving favorite:", e);
     }
 }
 
