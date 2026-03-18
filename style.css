@@ -746,3 +746,18 @@ header {
     filter: drop-shadow(0 0 5px #fff);
     color: #fff !important;
 }
+
+.shiny-sparkle-1, .shiny-sparkle-2 {
+    position: absolute;
+    font-size: 0.8rem;
+    z-index: 5;
+    animation: blink 1.5s infinite;
+}
+
+.shiny-sparkle-1 { top: 10px; left: 10px; }
+.shiny-sparkle-2 { bottom: 40px; right: 10px; animation-delay: 0.7s; }
+
+@keyframes blink {
+    0%, 100% { opacity: 0.2; transform: scale(0.8); }
+    50% { opacity: 1; transform: scale(1.2); }
+}
