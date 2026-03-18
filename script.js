@@ -185,8 +185,6 @@ function renderSprites(list) {
         card.className = `pokemon-card ${isShiny ? 'shiny-card' : ''}`;
         
         card.innerHTML = `
-            ${isShiny ? '<div class="shiny-sparkle-1">✨</div><div class="shiny-sparkle-2">✨</div>' : ''}
-            
             <button class="release-btn" title="Release ${name}" 
                     onclick="releasePokemon(${actualIndex}, '${name}')">×</button>
             
