@@ -274,18 +274,19 @@ async function toggleFavoriteDialog(index) {
         }
     }
 
+    // If we found an empty slot, auto-fill it!
     if (availableSlot !== -1) {
         updateFavorite(availableSlot, index);
-    } else {
-        const slotInput = prompt("Your favorites are full! Which slot (1, 2, 3, or 4) would you like to replace?");
-        if (!slotInput) return; 
+    } 
+    // If all 4 are full, trigger our sleek new custom modal
+    else {
+        // ---> THIS IS THE NEW CUSTOM PROMPT <---
+        const slotNum = await customPromptSlot();
         
-        const slotNum = parseInt(slotInput);
-        if (isNaN(slotNum) || slotNum < 1 || slotNum > 4) {
-            alert("Invalid slot. Please enter a number between 1 and 4.");
-            return;
-        }
+        // If they hit Cancel, slotNum is null, so we just stop.
+        if (!slotNum) return; 
         
+        // Arrays start at 0, so we subtract 1 from their choice
         updateFavorite(slotNum - 1, index);
     }
 }
