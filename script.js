@@ -107,18 +107,30 @@ async function fetchTrainerData(username) {
 // --- 4. FAVORITES UI UPDATER ---
 function updateFavoriteUI(favorites) {
     for (let i = 0; i < 4; i++) {
-        const slotImg = document.querySelector(`#fav-${i} img`);
-        if (!slotImg) continue;
+        const slotDiv = document.getElementById(`fav-${i}`);
+        if (!slotDiv) continue;
 
         const data = favorites && favorites[i];
         
         if (data) {
             const isShiny = data.s === 1;
-            slotImg.src = `https://img.pokemondb.net/sprites/home/${isShiny ? 'shiny' : 'normal'}/${data.n.toLowerCase()}.png`;
-            slotImg.title = data.n;
+            const name = data.n;
+            const [atk, def, hp] = data.iv || [0, 0, 0];
+            const imgSrc = `https://img.pokemondb.net/sprites/home/${isShiny ? 'shiny' : 'normal'}/${name.toLowerCase()}.png`;
+
+            slotDiv.innerHTML = `
+                <div class="fav-name ${isShiny ? 'shiny-text' : ''}">${name.toUpperCase()}</div>
+                <img src="${imgSrc}" alt="${name}">
+                <div class="fav-stats">
+                    <span class="${atk === 15 ? 'perfect-stat' : ''}">${atk}</span>/<span class="${def === 15 ? 'perfect-stat' : ''}">${def}</span>/<span class="${hp === 15 ? 'perfect-stat' : ''}">${hp}</span>
+                </div>
+            `;
         } else {
-            slotImg.src = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png";
-            slotImg.title = "Empty Slot";
+            slotDiv.innerHTML = `
+                <div class="fav-name">EMPTY</div>
+                <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png" alt="Empty">
+                <div class="fav-stats">-/-/-</div>
+            `;
         }
     }
 }
