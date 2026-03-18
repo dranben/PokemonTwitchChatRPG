@@ -333,31 +333,6 @@ header {
     gap: 20px;
 }
 
-.fav-slot {
-    width: 80px;
-    height: 80px;
-    background: #111;
-    border: 2px solid #333;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s ease;
-    cursor: pointer;
-    position: relative;
-}
-
-.fav-slot:hover {
-    border-color: #51ff00;
-    box-shadow: 0 0 15px rgba(81, 255, 0, 0.2);
-}
-
-.fav-slot img {
-    width: 60px;
-    height: 60px;
-    object-fit: contain;
-}
-
 /* Add a star to the card for the main grid so you can click to favorite */
 .fav-btn {
     position: absolute;
@@ -373,3 +348,58 @@ header {
 
 .is-owner .fav-btn { display: block; }
 .fav-btn.active { color: #ffd700; text-shadow: 0 0 5px gold; }
+
+.fav-slot {
+    width: 110px;      /* Made slightly wider */
+    min-height: 130px; /* Made taller to fit text */
+    background: #111;
+    border: 2px solid #333;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column; /* Stacks items vertically */
+    align-items: center;
+    justify-content: center;
+    padding: 10px 5px;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.fav-slot:hover {
+    border-color: #51ff00;
+    box-shadow: 0 0 15px rgba(81, 255, 0, 0.2);
+}
+
+.fav-slot img {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+    margin: 8px 0; /* Adds breathing room around the sprite */
+}
+
+/* New text styles for the mini-cards */
+.fav-name {
+    font-family: 'Press Start 2P', cursive;
+    font-size: 0.5rem;
+    color: #aaa;
+    text-align: center;
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis; /* Adds "..." if the name is too long */
+}
+
+.fav-stats {
+    font-family: 'Press Start 2P', cursive;
+    font-size: 0.45rem;
+    color: #888;
+    background: #222;
+    padding: 4px 6px;
+    border-radius: 4px;
+    letter-spacing: 1px;
+}
+
+/* Optional: Make Shiny names pop */
+.shiny-text {
+    color: #ffd700;
+    text-shadow: 0 0 5px rgba(255, 215, 0, 0.4);
+}
