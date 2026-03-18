@@ -437,3 +437,37 @@ function customConfirm(message) {
         btnNo.onclick = () => { cleanup(); resolve(false); };
     });
 }
+
+// --- CUSTOM SLOT SELECTOR ENGINE ---
+function customPromptSlot() {
+    return new Promise((resolve) => {
+        const modal = document.getElementById('slot-modal');
+        const cancelBtn = document.getElementById('slot-cancel');
+        const slotBtns = document.querySelectorAll('.slot-btn');
+
+        // Show the box
+        modal.classList.remove('hidden');
+
+        // Cleanup function
+        const cleanup = () => {
+            modal.classList.add('hidden');
+            cancelBtn.onclick = null;
+            slotBtns.forEach(b => b.onclick = null);
+        };
+
+        // If they click cancel, return null
+        cancelBtn.onclick = () => { 
+            cleanup(); 
+            resolve(null); 
+        };
+
+        // Loop through all 4 buttons and attach a click listener to each
+        slotBtns.forEach(btn => {
+            btn.onclick = (e) => {
+                cleanup();
+                // Grabs the number from the data-slot="X" attribute we put in the HTML
+                resolve(parseInt(e.target.getAttribute('data-slot')));
+            };
+        });
+    });
+}
