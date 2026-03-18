@@ -550,3 +550,21 @@ async function openDetailModal(pokeData) {
         if (typesContainer) typesContainer.innerHTML = `<span class="type-bubble" style="background:#ff3333">ERROR</span>`;
     }
 }
+
+// --- INFO DRAWER LOGIC ---
+document.getElementById('open-drawer').onclick = () => {
+    document.getElementById('info-drawer').classList.remove('hidden');
+};
+
+document.getElementById('close-drawer').onclick = () => {
+    document.getElementById('info-drawer').classList.add('hidden');
+};
+
+// Close drawer if clicking outside of it
+window.addEventListener('click', (e) => {
+    const drawer = document.getElementById('info-drawer');
+    const fab = document.getElementById('open-drawer');
+    if (!drawer.contains(e.target) && e.target !== fab && !drawer.classList.contains('hidden')) {
+        drawer.classList.add('hidden');
+    }
+});
