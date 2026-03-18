@@ -780,8 +780,8 @@ header {
 
 /* Bottom Right Sparkle (near the stats) */
 .shiny-sparkle-2 {
-    bottom: 50px;
-    right: 15px;
+    Top: 10px;
+    right: 10px;
     animation-delay: 1s; /* Offsets the blink so they don't pulse at the same time */
 }
 
