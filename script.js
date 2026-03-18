@@ -78,24 +78,25 @@ function updateAuthUI(username) {
 // --- 3. DATA FETCHING ---
 async function fetchTrainerData(username) {
     const display = document.getElementById('pokemon-display');
-    const trainerNameSpan = document.getElementById('trainer-name'); // Targets the span only
+    const trainerNameSpan = document.getElementById('trainer-name');
     const statTotal = document.getElementById('stat-total');
     const statBalance = document.getElementById('stat-balance');
     
-    // Update the name in the header (keeping the "TRAINER NAME:" label)
     trainerNameSpan.innerText = username.toUpperCase();
-    
     display.innerHTML = "<p class='loading'>Scanning Storage Units...</p>";
 
     try {
         const res = await fetch(`${WORKER_URL}?user=${username}&userstats=true`);
         const data = await res.json();
         
-        // Update Stats
+        // 1. Update Stats
         statTotal.innerText = data.total || 0;
         statBalance.innerText = data.balance?.toLocaleString() || 0;
         
-        // Process Collection
+        // ---> 2. CALL THE FAVORITES FUNCTION HERE <---
+        updateFavoriteUI(data.favorites);
+        
+        // 3. Process the main Collection
         fullCollection = (data.collection || []).filter(Boolean);
         renderSprites([...fullCollection].reverse());
         
@@ -105,6 +106,23 @@ async function fetchTrainerData(username) {
 }
 
 // --- 4. THE RENDERING ENGINE (RECTANGULAR CARDS) ---
+function toggleFavoriteDialog(index) {
+    const slot = prompt("Which Favorite Slot? (1, 2, 3, or 4)");
+    if (!slot || slot < 1 || slot > 4) return;
+    updateFavorite(slot - 1, index);
+}
+
+async function updateFavorite(slot, pokeIndex) {
+    const user = localStorage.getItem('twitch_user');
+    const token = localStorage.getItem('auth_token');
+    
+    const res = await fetch(`${WORKER_URL}?user=${user}&set_favorite=true&slot=${slot}&index=${pokeIndex}&token=${token}`);
+    if (res.ok) {
+        alert("Favorite set!");
+        fetchTrainerData(user); // Refresh page
+    }
+}
+
 function renderSprites(list) {
     const display = document.getElementById('pokemon-display');
     display.innerHTML = "";
@@ -249,3 +267,17 @@ document.getElementById('sort-order').addEventListener('change', (e) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" } 
       });
     }
+
+function updateFavoriteUI(favorites) {
+    for (let i = 0; i < 4; i++) {
+        const slotImg = document.querySelector(`#fav-${i} img`);
+        const data = favorites && favorites[i];
+        
+        if (data) {
+            const isShiny = data.s === 1;
+            slotImg.src = `https://img.pokemondb.net/sprites/home/${isShiny ? 'shiny' : 'normal'}/${data.n.toLowerCase()}.png`;
+        } else {
+            slotImg.src = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png";
+        }
+    }
+}
