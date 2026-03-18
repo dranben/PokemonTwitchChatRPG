@@ -504,24 +504,39 @@ async function openDetailModal(pokeData) {
     modal.classList.remove('hidden');
     setTimeout(() => innerCard.classList.add('show'), 10);
 
-    // 3. Fetch the official Pokedex flavor text in the background
+    // 3. ---> NEW: Fetch BOTH endpoints at the exact same time <---
     try {
         const query = pokeData.id ? pokeData.id : pokeData.n.toLowerCase();
-        const res = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${query}`);
-        const data = await res.json();
         
-        // Find the first English entry
-        const entry = data.flavor_text_entries.find(e => e.language.name === "en");
+        const [speciesRes, pokemonRes] = await Promise.all([
+            fetch(`https://pokeapi.co/api/v2/pokemon-species/${query}`),
+            fetch(`https://pokeapi.co/api/v2/pokemon/${query}`)
+        ]);
+        
+        const speciesData = await speciesRes.json();
+        const pokemonData = await pokemonRes.json();
+        
+        // Build the Type Bubbles
+        typesContainer.innerHTML = "";
+        pokemonData.types.forEach(t => {
+            const typeName = t.type.name;
+            const span = document.createElement('span');
+            span.className = `type-bubble type-${typeName}`;
+            span.innerText = typeName;
+            typesContainer.appendChild(span);
+        });
+
+        // Find the first English Pokedex entry
+        const entry = speciesData.flavor_text_entries.find(e => e.language.name === "en");
         if (entry) {
-            // PokeAPI has weird hidden line breaks, this regex cleans them up
             dexElement.innerText = `"${entry.flavor_text.replace(/\f|\n/g, ' ')}"`;
         } else {
             dexElement.innerText = "Data corrupted. No Pokédex entry found.";
         }
     } catch (e) {
         dexElement.innerText = "Connection lost. Could not load Pokédex entry.";
+        typesContainer.innerHTML = `<span class="type-bubble" style="background:#ff3333">ERROR</span>`;
     }
-
     // 4. Handle Closing the Modal (with reverse animation)
     const close = () => {
         innerCard.classList.remove('show'); // Flips it away
