@@ -31,6 +31,17 @@
             <p class="subtitle">Pokemon Twitch Chat RPG</p>
         </div>
 
+        <div class="trainer-stats-bar">
+            <div class="stat-item">
+                <span class="label">TOTAL CAUGHT:</span>
+                <span id="stat-total" class="value">0</span>
+            </div>
+            <div class="stat-item">
+                <span class="label">BALANCE:</span>
+                <span class="value">$</span><span id="stat-balance" class="value">0</span>
+            </div>
+        </div>
+
         <div class="controls-row">
             <input type="text" id="pokemon-filter" placeholder="Filter by Name...">
             <select id="sort-order">
@@ -45,6 +56,7 @@
         <hr class="divider">
 
         <div id="pokemon-display"></div>
+        
     </main>
 
     <script src="script.js"></script>
