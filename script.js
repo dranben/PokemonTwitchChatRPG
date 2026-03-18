@@ -149,48 +149,45 @@ function renderSprites(list) {
     const validList = list.filter(Boolean);
 
     validList.forEach((entry) => {
-        const actualIndex = fullCollection.indexOf(entry);
-        let name, isShiny, atk, def, hp;
+    // 1. (Keep the existing actualIndex logic here)
+    
+    // 2. DEFINE THE STATS
+    let name, isShiny, atk, def, hp;
+    if (typeof entry === 'object' && entry.n) {
+        name = entry.n;
+        isShiny = entry.s === 1;
+        [atk, def, hp] = entry.iv || [0,0,0];
+    } else {
+        // (Keep support for legacy strings if needed)
+    }
 
-        if (typeof entry === 'object') {
-            name = entry.n;
-            isShiny = entry.s === 1;
-            [atk, def, hp] = entry.iv || [0,0,0];
-        } else {
-            // Support for legacy strings
-            isShiny = entry.includes('✨');
-            name = entry.split('(')[0].replace('✨', '').trim();
-            const ivMatch = entry.match(/\((.*?)\)/);
-            [atk, def, hp] = ivMatch ? ivMatch[1].split('/').map(Number) : [0,0,0];
-        }
-
-        const card = document.createElement('div');
-        card.className = `pokemon-card ${isShiny ? 'shiny-card' : ''}`;
+    // 3. CREATE THE POKEMON CARD (Rectangular style is applied by CSS)
+    const card = document.createElement('div');
+    card.className = `pokemon-card ${isShiny ? 'shiny-card' : ''}`;
+    
+    card.innerHTML = `
+        <button class="release-btn" onclick="releasePokemon(${actualIndex}, '${name}')">×</button>
+        <img src="https://img.pokemondb.net/sprites/home/${isShiny ? 'shiny' : 'normal'}/${name.toLowerCase()}.png" 
+             onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png'">
         
-        card.innerHTML = `
-            <button class="release-btn" onclick="releasePokemon(${actualIndex}, '${name}')">×</button>
-            <img src="https://img.pokemondb.net/sprites/home/${isShiny ? 'shiny' : 'normal'}/${name.toLowerCase()}.png" 
-                 onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png'">
-            
-            <div class="stats-box">
-                <div class="stat-row">
-                    <span class="stat-label">ATK</span>
-                    <span class="stat-value ${atk === 15 ? 'perfect-stat' : ''}">${atk}</span>
-                </div>
-                <div class="stat-row">
-                    <span class="stat-label">DEF</span>
-                    <span class="stat-value ${def === 15 ? 'perfect-stat' : ''}">${def}</span>
-                </div>
-                <div class="stat-row">
-                    <span class="stat-label">STA</span>
-                    <span class="stat-value ${hp === 15 ? 'perfect-stat' : ''}">${hp}</span>
-                </div>
+        <div class="stats-box">
+            <div class="stat-row">
+                <span class="stat-label">ATK</span>
+                <span class="stat-value ${atk === 15 ? 'perfect-stat' : ''}">${atk}</span>
             </div>
-        `;
-        
-        display.appendChild(card);
-    });
-}
+            <div class="stat-row">
+                <span class="stat-label">DEF</span>
+                <span class="stat-value ${def === 15 ? 'perfect-stat' : ''}">${def}</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">STA</span>
+                <span class="stat-value ${hp === 15 ? 'perfect-stat' : ''}">${hp}</span>
+            </div>
+        </div>
+    `;
+    
+    display.appendChild(card);
+});
 
 async function releasePokemon(index, name) {
     if (!confirm(`Release ${name}?`)) return;
