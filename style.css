@@ -576,3 +576,44 @@ header {
     border-left: 4px solid #51ff00;
     text-align: left;
 }
+
+/* --- POKEMON TYPE BUBBLES --- */
+.type-container {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: -5px;
+    margin-bottom: 15px;
+}
+
+.type-bubble {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 0.5rem;
+    color: #fff;
+    text-transform: uppercase;
+    text-shadow: 1px 1px 0px rgba(0,0,0,0.8);
+    border: 1px solid rgba(255,255,255,0.2);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
+/* Official Type Colors */
+.type-normal { background-color: #A8A77A; }
+.type-fire { background-color: #EE8130; }
+.type-water { background-color: #6390F0; }
+.type-electric { background-color: #F7D02C; }
+.type-grass { background-color: #7AC74C; }
+.type-ice { background-color: #96D9D6; }
+.type-fighting { background-color: #C22E28; }
+.type-poison { background-color: #A33EA1; }
+.type-ground { background-color: #E2BF65; }
+.type-flying { background-color: #A98FF3; }
+.type-psychic { background-color: #F95587; }
+.type-bug { background-color: #A6B91A; }
+.type-rock { background-color: #B6A136; }
+.type-ghost { background-color: #735797; }
+.type-dragon { background-color: #6F35FC; }
+.type-dark { background-color: #705848; }
+.type-steel { background-color: #B7B7CE; }
+.type-fairy { background-color: #D685AD; }
