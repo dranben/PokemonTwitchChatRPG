@@ -72,24 +72,32 @@ function updateAuthUI(username) {
 async function fetchTrainerData(username) {
     const display = document.getElementById('pokemon-display');
     const trainerTitle = document.getElementById('trainer-name');
+    const statTotal = document.getElementById('stat-total');
+    const statBalance = document.getElementById('stat-balance');
     
     trainerTitle.innerText = username;
-    display.innerHTML = "<p class='loading'>Scanning Storage Units...</p>";
+    display.innerHTML = "<p>Scanning Storage Units...</p>";
 
     try {
-        const res = await fetch(`${WORKER_URL}?user=${username}&userstats=true`);
+        const url = `${WORKER_URL}?user=${username}&userstats=true`;
+        console.log("Fetching from:", url); // See the exact URL being called
+
+        const res = await fetch(url);
+        
+        if (!res.ok) throw new Error(`Server responded with ${res.status}`);
+        
         const data = await res.json();
-        
-        // 1. UPDATE THE TOP STATS
+        console.log("Data received:", data);
+
         statTotal.innerText = data.total || 0;
-        statBalance.innerText = data.balance?.toLocaleString() || 0; // .toLocaleString adds commas to big numbers
+        statBalance.innerText = data.balance?.toLocaleString() || 0;
         
-        // 2. PROCESS COLLECTION
         fullCollection = (data.collection || []).filter(Boolean);
         renderSprites([...fullCollection].reverse());
         
     } catch (e) {
-        display.innerHTML = "<p>Error: Storage unit is offline.</p>";
+        console.error("DETAILED ERROR:", e); // This tells us the REAL problem
+        display.innerHTML = `<p>Error: ${e.message}</p>`;
     }
 }
 
