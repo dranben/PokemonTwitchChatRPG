@@ -51,6 +51,23 @@ header {
     letter-spacing: 2px;
 }
 
+.pokemon-name {
+    font-family: 'Press Start 2P', cursive;
+    font-size: 0.55rem;
+    color: #aaa; /* Subtle grey so it doesn't distract from stats */
+    margin-bottom: 10px;
+    padding-top: 5px;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis; /* Keeps long names like "Corvisquire" from breaking the card */
+}
+
+/* Optional: Make the name glow if it's a Shiny */
+.shiny-card .pokemon-name {
+    color: #ffd700;
+    text-shadow: 0 0 5px rgba(255, 215, 0, 0.3);
+}
 /* --- SEARCH & SORT BAR --- */
 .controls-row {
     display: flex;
