@@ -478,3 +478,56 @@ function customPromptSlot() {
         });
     });
 }
+
+// --- POKEDEX DETAIL ENGINE ---
+async function openDetailModal(pokeData) {
+    const modal = document.getElementById('detail-modal');
+    const innerCard = document.getElementById('detail-card-inner');
+    
+    // 1. Populate the basic stats immediately
+    const isShiny = pokeData.s === 1;
+    document.getElementById('detail-name').innerText = pokeData.n.toUpperCase() + (isShiny ? " ✨" : "");
+    document.getElementById('detail-img').src = `https://img.pokemondb.net/sprites/home/${isShiny ? 'shiny' : 'normal'}/${pokeData.n.toLowerCase()}.png`;
+    
+    const [atk, def, hp] = pokeData.iv || [0,0,0];
+    document.getElementById('detail-atk').innerText = atk;
+    document.getElementById('detail-atk').className = `stat-value ${atk === 15 ? 'perfect-stat' : ''}`;
+    document.getElementById('detail-def').innerText = def;
+    document.getElementById('detail-def').className = `stat-value ${def === 15 ? 'perfect-stat' : ''}`;
+    document.getElementById('detail-hp').innerText = hp;
+    document.getElementById('detail-hp').className = `stat-value ${hp === 15 ? 'perfect-stat' : ''}`;
+    
+    const dexElement = document.getElementById('detail-dex-entry');
+    dexElement.innerText = "Accessing global Pokédex...";
+
+    // 2. Show the modal, then trigger the CSS flip animation
+    modal.classList.remove('hidden');
+    setTimeout(() => innerCard.classList.add('show'), 10);
+
+    // 3. Fetch the official Pokedex flavor text in the background
+    try {
+        const query = pokeData.id ? pokeData.id : pokeData.n.toLowerCase();
+        const res = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${query}`);
+        const data = await res.json();
+        
+        // Find the first English entry
+        const entry = data.flavor_text_entries.find(e => e.language.name === "en");
+        if (entry) {
+            // PokeAPI has weird hidden line breaks, this regex cleans them up
+            dexElement.innerText = `"${entry.flavor_text.replace(/\f|\n/g, ' ')}"`;
+        } else {
+            dexElement.innerText = "Data corrupted. No Pokédex entry found.";
+        }
+    } catch (e) {
+        dexElement.innerText = "Connection lost. Could not load Pokédex entry.";
+    }
+
+    // 4. Handle Closing the Modal (with reverse animation)
+    const close = () => {
+        innerCard.classList.remove('show'); // Flips it away
+        setTimeout(() => modal.classList.add('hidden'), 400); // Hides the background after flip
+    };
+
+    document.getElementById('close-detail').onclick = close;
+    modal.onclick = (e) => { if (e.target === modal) close(); }; // Close if clicking the dark background
+}
