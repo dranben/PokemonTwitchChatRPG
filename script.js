@@ -289,19 +289,17 @@ async function updateFavorite(slot, pokeIndex) {
     const user = localStorage.getItem('twitch_user');
     const token = localStorage.getItem('auth_token');
     
-    // --- 1. OPTIMISTIC UI UPDATE (Instant Visuals) ---
+    // --- 1. OPTIMISTIC UI UPDATE ---
     const targetPoke = fullCollection[pokeIndex];
 
     if (slot === -1) {
-        // Un-favoriting: Remove the tag from the local memory
-        delete targetPoke.fav;
+        delete targetPoke.fav; // Remove favorite
     } else {
-        // Favoriting: Strip this slot from anyone else, then assign it
+        // Strip this slot from anyone else, then assign it
         fullCollection.forEach(p => { if (p.fav === slot) delete p.fav; });
         targetPoke.fav = slot;
     }
 
-    // Instantly rebuild the top bar without waiting for the server
     const tempFavorites = [null, null, null, null];
     fullCollection.forEach(p => {
         if (p.fav !== undefined && p.fav >= 0 && p.fav <= 3) {
@@ -309,18 +307,52 @@ async function updateFavorite(slot, pokeIndex) {
         }
     });
     
-    // Redraw the 4 slots instantly
+    // Instantly Redraw the Top Bar
     updateFavoriteUI(tempFavorites);
+
+    // ---> NEW: Instantly Redraw the Main Grid <---
+    // We grab the current search term and sort order so the grid doesn't reset wildly
+    const filterInput = document.getElementById('pokemon-filter');
+    const term = filterInput ? filterInput.value.toLowerCase() : "";
+    
+    let displayList = fullCollection.map((poke, idx) => ({ ...poke, originalIndex: idx }));
+    
+    if (term) {
+        displayList = displayList.filter(i => {
+            const name = typeof i === 'object' ? i.n : i;
+            return name.toLowerCase().includes(term);
+        });
+    }
+    
+    const sortOrder = document.getElementById('sort-order');
+    const val = sortOrder ? sortOrder.value : "newest";
+    
+    if (val === "newest") {
+        displayList.reverse();
+    } else if (val === "pokedex") {
+        displayList.sort((a, b) => (a.id || 0) - (b.id || 0));
+    } else if (val === "alpha") {
+        displayList.sort((a, b) => {
+            const nameA = typeof a === 'object' ? a.n : a;
+            const nameB = typeof b === 'object' ? b.n : b;
+            return nameA.localeCompare(nameB);
+        });
+    } else if (val === "shiny") {
+        displayList.sort((a, b) => {
+            const sA = typeof a === 'object' ? a.s : (a.includes('✨') ? 1 : 0);
+            const sB = typeof b === 'object' ? b.s : (b.includes('✨') ? 1 : 0);
+            return sB - sA;
+        });
+    }
+    
+    renderSprites(displayList); // Re-draws the grid with updated yellow stars
 
     // --- 2. BACKGROUND DATABASE SAVE ---
     try {
-        // Send the request quietly in the background
         const res = await fetch(`${WORKER_URL}?user=${user}&set_favorite=true&slot=${slot}&index=${pokeIndex}&token=${token}`);
-        
         if (!res.ok) {
-            // If the server rejects it (e.g., token expired), revert the UI by doing a hard refresh
             console.error("Server rejected favorite save.");
-            fetchTrainerData(user); 
+            fetchTrainerData(currentUserView); // Hard refresh if it fails
         }
     } catch (e) {
         console.error("Network error while saving favorite:", e);
