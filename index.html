@@ -69,6 +69,39 @@
         
     </main>
 
+    <div id="info-drawer" class="drawer hidden">
+        <div class="drawer-content">
+            <button id="close-drawer" class="close-btn">×</button>
+            <h2 class="pokemon-name" style="color: #51ff00; margin-bottom: 20px;">TRAINER MANUAL</h2>
+            
+            <section class="info-section">
+                <h3>💬 CHAT COMMANDS</h3>
+                <ul class="command-list">
+                    <li><span>!catch</span> - Catch a wild Pokémon</li>
+                    <li><span>!bal</span> - Check your ₽ balance</li>
+                    <li><span>!mypokemon</span> - Link to your storage</li>
+                    <li><span>!catchstats</span> - Your trainer summary</li>
+                    <li><span>!market</span> - View items for sale</li>
+                    <li><span>!buy [item]</span> - Purchase an item</li>
+                </ul>
+            </section>
+    
+            <section class="info-section">
+                <h3>📺 ACTIVE STREAMS</h3>
+                <div class="streamer-link">
+                    <a href="https://twitch.tv/dirty" target="_blank">twitch.tv/dirty</a>
+                    <span class="status-dot"></span>
+                </div>
+            </section>
+    
+            <section class="info-section" style="font-size: 0.6rem; color: #666; margin-top: 40px;">
+                <p>Storage OS v1.2<br>Built for the community.</p>
+            </section>
+        </div>
+    </div>
+
+<button id="open-drawer" class="info-fab">?</button>
+
     <script src="script.js"></script>
     <div id="custom-modal" class="modal-overlay hidden">
         <div class="modal-box">
