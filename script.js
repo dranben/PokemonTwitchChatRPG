@@ -1,57 +1,41 @@
-// --- 1. CONFIGURATION ---
-const WORKER_URL = "https://pokemon.brandenkenn.workers.dev";
-const CLIENT_ID = "oqdrp3gkw3lczkb14z6h74ycboupib"; // Replace with your Twitch Client ID
+const CLIENT_ID = "oqdrp3gkw3lczkb14z6h74ycboupib"; 
 const REDIRECT_URI = "https://dranben.com";
+const WORKER_URL = "https://pokemon.brandenkenn.workers.dev";
 
-let fullCollection = [];
-let leaderboardData = null;
+let fullCollection = []; // The master list of Pokemon objects/strings
 
-// --- 2. TWITCH AUTH LOGIC ---
-function loginWithTwitch() {
-    const scope = "user:read:email"; 
-    const authUrl = `https://id.twitch.tv/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=code&scope=${scope}`;
-    window.location.href = authUrl;
-}
+// --- 1. INITIALIZATION ---
+window.onload = async () => {
+    // Check if we are returning from Twitch or have a saved session
+    await handleTwitchRedirect();
 
-function checkSession() {
-    const savedUser = localStorage.getItem('twitch_user');
-    const savedToken = localStorage.getItem('auth_token');
+    // Determine which trainer's storage to display
+    const urlParams = new URLSearchParams(window.location.search);
+    const userToLoad = urlParams.get('user') || localStorage.getItem('twitch_user') || 'dranben';
+    
+    // Sync the search input field
+    document.getElementById('username-input').value = userToLoad;
+    
+    // Load the trainer's data
+    fetchTrainerData(userToLoad);
+};
 
-    if (savedUser && savedToken && savedToken !== "undefined") {
-        updateAuthUI(savedUser);
-        return true;
-    }
-    return false;
-}
-
-function updateAuthUI(username) {
-    const loginBtn = document.getElementById('login-btn');
-    const userDisplay = document.getElementById('user-display');
-
-    if (loginBtn && userDisplay) {
-        loginBtn.style.display = 'none';
-        userDisplay.innerText = `TRAINER: ${username.toUpperCase()}`;
-        userDisplay.style.display = 'inline-block';
-        // Add a little glow to show it's active
-        userDisplay.style.textShadow = "0 0 10px #51ff00";
-    }
-}
-
+// --- 2. TWITCH AUTH & SESSION MANAGEMENT ---
 async function handleTwitchRedirect() {
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get('code');
 
-    // If there's a code in the URL, we just got back from Twitch
     if (code) {
         try {
             const res = await fetch(`${WORKER_URL}?login_code=${code}`);
             const authData = await res.json();
 
             if (authData.status === "success") {
+                // Save credentials to browser memory
                 localStorage.setItem('twitch_user', authData.user);
                 localStorage.setItem('auth_token', authData.token);
                 
-                // Clean the URL so the 'code' doesn't hang around
+                // Clean the URL (removes the ?code=...)
                 window.history.replaceState({}, document.title, "/");
                 updateAuthUI(authData.user);
             }
@@ -59,86 +43,60 @@ async function handleTwitchRedirect() {
             console.error("Auth Handshake Failed:", e);
         }
     } else {
-        // No code in URL? Check if we already have a session saved
         checkSession();
     }
 }
 
-function updateAuthUI(username) {
-    document.getElementById('login-btn').style.display = 'none';
-    const display = document.getElementById('user-display');
-    display.innerText = `LOGGED IN: ${username.toUpperCase()}`;
-    display.style.display = 'inline-block';
-}
-
-// --- 3. TAB NAVIGATION ---
-function openTab(tabId, btn) {
-    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+function checkSession() {
+    const savedUser = localStorage.getItem('twitch_user');
+    const savedToken = localStorage.getItem('auth_token');
     
-    document.getElementById(tabId).classList.add('active');
-    btn.classList.add('active');
-
-    if (tabId === 'leaderboard-view') loadShinyLeaderboard();
-}
-
-function switchLeaderboard(cat, btn) {
-    document.querySelectorAll('.sub-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    
-    const listEl = document.getElementById('leaderboard-list');
-    listEl.innerHTML = "";
-
-    if (!leaderboardData) return;
-
-    if (cat === 'global') {
-        const g = leaderboardData.global;
-        const rows = [
-            ["SHINIES", g.shinies], 
-            ["LEGENDARIES", g.Legendaries], 
-            ["HUNDOS", g.hundos], 
-            ["NUNDOS", g.nundos], 
-            ["SHUNDOS", g.shundos]
-        ];
-        rows.forEach(r => { 
-            listEl.innerHTML += `<div class="leader-row"><span>${r[0]}</span><span class="rank-count">${r[1] || 0}</span></div>`; 
-        });
-    } else {
-        const list = leaderboardData.topLists[cat] || [];
-        if (list.length === 0) { 
-            listEl.innerHTML = '<div class="leader-row">No entries yet!</div>'; 
-            return; 
-        }
-        list.forEach((e, i) => {
-            listEl.innerHTML += `<div class="leader-row"><span>#${i+1} ${e.user}</span><span class="rank-count">${e.count}</span></div>`;
-        });
+    // Ensure the token isn't the literal string "undefined"
+    if (savedUser && savedToken && savedToken !== "undefined") {
+        updateAuthUI(savedUser);
     }
 }
 
-// --- 4. DATA FETCHING ---
-async function fetchTrainerData(user) {
-    const nameEl = document.getElementById('trainer-name');
-    nameEl.innerText = "LOADING...";
+function updateAuthUI(username) {
+    const loginBtn = document.getElementById('login-btn');
+    const userDisplay = document.getElementById('user-display');
+    
+    if (loginBtn && userDisplay) {
+        loginBtn.style.display = 'none';
+        userDisplay.innerText = `TRAINER: ${username.toUpperCase()}`;
+        userDisplay.style.display = 'inline-block';
+    }
+}
+
+// --- 3. DATA FETCHING ---
+async function fetchTrainerData(username) {
+    const display = document.getElementById('pokemon-display');
+    const trainerTitle = document.getElementById('trainer-name');
+    
+    trainerTitle.innerText = username;
+    display.innerHTML = "<p class='loading'>Scanning Storage Units...</p>";
+
     try {
-        const res = await fetch(`${WORKER_URL}?user=${encodeURIComponent(user)}&userstats=true&format=json`);
+        const res = await fetch(`${WORKER_URL}?user=${username}&userstats=true`);
         const data = await res.json();
         
-        nameEl.innerText = user.toUpperCase();
-        document.getElementById('trainer-balance').innerText = `₽${(data.balance || 0).toLocaleString()}`;
-        document.getElementById('trainer-total').innerText = data.total || 0;
+        // Filter out nulls and store the clean list globally
+        fullCollection = (data.collection || []).filter(Boolean);
         
-        fullCollection = data.collection || [];
+        // Show newest catches first by default
         renderSprites([...fullCollection].reverse());
-    } catch (e) { 
-        nameEl.innerText = "ERROR"; 
+    } catch (e) {
+        display.innerHTML = "<p>Error: Storage unit is offline or trainer not found.</p>";
     }
 }
 
+// --- 4. THE RENDERING ENGINE (RECTANGULAR CARDS) ---
 function renderSprites(list) {
     const display = document.getElementById('pokemon-display');
     display.innerHTML = "";
     if (!list) return;
 
+    // Security Check: Only show the "Release" X if the logged-in user matches the trainer
     const loggedInUser = localStorage.getItem('twitch_user');
     const currentTrainer = document.getElementById('trainer-name').innerText.toLowerCase();
     const isOwner = loggedInUser && loggedInUser.toLowerCase() === currentTrainer;
@@ -146,89 +104,88 @@ function renderSprites(list) {
     if (isOwner) display.classList.add('is-owner');
     else display.classList.remove('is-owner');
 
-    const validList = list.filter(Boolean);
-
-    validList.forEach((entry) => {
-    // 1. (Keep the existing actualIndex logic here)
-    
-    // 2. DEFINE THE STATS
-    let name, isShiny, atk, def, hp;
-    if (typeof entry === 'object' && entry.n) {
-        name = entry.n;
-        isShiny = entry.s === 1;
-        [atk, def, hp] = entry.iv || [0,0,0];
-    } else {
-        // (Keep support for legacy strings if needed)
-    }
-
-    // 3. CREATE THE POKEMON CARD (Rectangular style is applied by CSS)
-    const card = document.createElement('div');
-    card.className = `pokemon-card ${isShiny ? 'shiny-card' : ''}`;
-    
-    card.innerHTML = `
-        <button class="release-btn" onclick="releasePokemon(${actualIndex}, '${name}')">×</button>
-        <img src="https://img.pokemondb.net/sprites/home/${isShiny ? 'shiny' : 'normal'}/${name.toLowerCase()}.png" 
-             onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png'">
+    list.forEach((entry) => {
+        // CRITICAL: Find the true index in fullCollection so we delete the right Pokemon
+        const actualIndex = fullCollection.indexOf(entry);
         
-        <div class="stats-box">
-            <div class="stat-row">
-                <span class="stat-label">ATK</span>
-                <span class="stat-value ${atk === 15 ? 'perfect-stat' : ''}">${atk}</span>
-            </div>
-            <div class="stat-row">
-                <span class="stat-label">DEF</span>
-                <span class="stat-value ${def === 15 ? 'perfect-stat' : ''}">${def}</span>
-            </div>
-            <div class="stat-row">
-                <span class="stat-label">STA</span>
-                <span class="stat-value ${hp === 15 ? 'perfect-stat' : ''}">${hp}</span>
-            </div>
-        </div>
-    `;
-    
-    display.appendChild(card);
-});
+        let name, isShiny, atk, def, hp;
 
+        // Modern Object Format
+        if (typeof entry === 'object' && entry.n) {
+            name = entry.n;
+            isShiny = entry.s === 1;
+            [atk, def, hp] = entry.iv || [0, 0, 0];
+        } 
+        // Legacy String Format (Fallback)
+        else if (typeof entry === 'string') {
+            isShiny = entry.includes('✨');
+            name = entry.split('(')[0].replace('✨', '').trim();
+            const ivMatch = entry.match(/\((.*?)\)/);
+            [atk, def, hp] = ivMatch ? ivMatch[1].split('/').map(Number) : [0, 0, 0];
+        } else {
+            return; // Skip if data is corrupted
+        }
+
+        const card = document.createElement('div');
+        card.className = `pokemon-card ${isShiny ? 'shiny-card' : ''}`;
+        
+        card.innerHTML = `
+            <button class="release-btn" title="Release ${name}" 
+                    onclick="releasePokemon(${actualIndex}, '${name}')">×</button>
+            
+            <img src="https://img.pokemondb.net/sprites/home/${isShiny ? 'shiny' : 'normal'}/${name.toLowerCase()}.png" 
+                 alt="${name}"
+                 onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png'">
+            
+            <div class="stats-box">
+                <div class="stat-row">
+                    <span class="stat-label">ATK</span>
+                    <span class="stat-value ${atk === 15 ? 'perfect-stat' : ''}">${atk}</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">DEF</span>
+                    <span class="stat-value ${def === 15 ? 'perfect-stat' : ''}">${def}</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">STA</span>
+                    <span class="stat-value ${hp === 15 ? 'perfect-stat' : ''}">${hp}</span>
+                </div>
+            </div>
+        `;
+        
+        display.appendChild(card);
+    });
+}
+
+// --- 5. USER ACTIONS ---
 async function releasePokemon(index, name) {
-    if (!confirm(`Release ${name}?`)) return;
-
     const token = localStorage.getItem('auth_token');
     const user = localStorage.getItem('twitch_user');
-    
-    const res = await fetch(`${WORKER_URL}?user=${user}&release_index=${index}&token=${token}`);
-    const message = await res.text();
 
-    alert(message);
-    
-    // This line is key! It re-runs the fetch to show the updated list
-    fetchTrainerData(user); 
-}
+    if (!token || token === "undefined") {
+        alert("Authentication required. Please login with Twitch.");
+        return;
+    }
 
-async function loadShinyLeaderboard() {
-    const listEl = document.getElementById('leaderboard-list');
-    listEl.innerHTML = '<div class="leader-row">SYNCING...</div>';
+    if (!confirm(`Are you sure you want to release your ${name}? This cannot be undone.`)) return;
+
     try {
-        const res = await fetch(`${WORKER_URL}?leaderboard=true&format=json`);
-        leaderboardData = await res.json();
-        switchLeaderboard('global', document.querySelector('.sub-btn.active'));
-    } catch (e) { 
-        listEl.innerHTML = "Offline"; 
+        const res = await fetch(`${WORKER_URL}?user=${user}&release_index=${index}&token=${token}`);
+        const result = await res.text();
+        
+        alert(result);
+        fetchTrainerData(user); // Force-refresh the storage units
+    } catch (e) {
+        alert("Server communication failed.");
     }
 }
 
-// --- 5. EVENT LISTENERS ---
-document.getElementById('search-btn').addEventListener('click', () => {
-    const v = document.getElementById('username-input').value.trim();
-    if (v) fetchTrainerData(v);
-});
-
+// --- 6. SEARCH & SORT LISTENERS ---
 document.getElementById('pokemon-filter').addEventListener('input', (e) => {
     const term = e.target.value.toLowerCase();
     const filtered = fullCollection.filter(i => {
-        if (!i) return false; // Skip nulls
-        const name = (typeof i === 'object') ? i.n : i;
-        // Ensure name is a string before calling includes
-        return String(name).toLowerCase().includes(term);
+        const name = typeof i === 'object' ? i.n : i;
+        return name.toLowerCase().includes(term);
     });
     renderSprites(filtered);
 });
@@ -238,45 +195,22 @@ document.getElementById('sort-order').addEventListener('change', (e) => {
     let sorted = [...fullCollection];
 
     if (val === "newest") {
-        sorted.reverse(); // Manually reverse for Newest first
-    } 
-    else if (val === "pokedex") {
-        sorted.sort((a, b) => {
-            const idA = typeof a === 'object' ? a.id : 9999;
-            const idB = typeof b === 'object' ? b.id : 9999;
-            return idA - idB; // 1 to 1025
-        });
-    } 
-    else if (val === "alpha") {
+        sorted.reverse();
+    } else if (val === "pokedex") {
+        sorted.sort((a, b) => (a.id || 0) - (b.id || 0));
+    } else if (val === "alpha") {
         sorted.sort((a, b) => {
             const nameA = typeof a === 'object' ? a.n : a;
             const nameB = typeof b === 'object' ? b.n : b;
-            return nameA.localeCompare(nameB); // A to Z
+            return nameA.localeCompare(nameB);
         });
-    } 
-    else if (val === "shiny") {
+    } else if (val === "shiny") {
         sorted.sort((a, b) => {
-            const isShinyA = typeof a === 'object' ? a.s : (String(a).includes('✨') ? 1 : 0);
-            const isShinyB = typeof b === 'object' ? b.s : (String(b).includes('✨') ? 1 : 0);
-            return isShinyB - isShinyA; // Shinies at top
+            const sA = typeof a === 'object' ? a.s : (a.includes('✨') ? 1 : 0);
+            const sB = typeof b === 'object' ? b.s : (b.includes('✨') ? 1 : 0);
+            return sB - sA;
         });
     }
-    // "oldest" stays as-is (natural KV order)
-
+    // "oldest" is the default array order
     renderSprites(sorted);
 });
-
-// --- 6. INITIAL LOAD ---
-window.onload = async () => {
-    // 1. Handle any incoming login redirects
-    await handleTwitchRedirect();
-
-    // 2. Decide whose data to show
-    const urlParams = new URLSearchParams(window.location.search);
-    const userToLoad = urlParams.get('user') || localStorage.getItem('twitch_user') || 'dranben';
-    
-    // 3. Update the UI input field to show who we are looking at
-    document.getElementById('username-input').value = userToLoad;
-    
-    fetchTrainerData(userToLoad);
-};
