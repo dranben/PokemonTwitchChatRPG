@@ -507,46 +507,63 @@ async function loadMarket() {
     }
 }
 
-// --- 11. LOAD INVENTORY (MY BAG) ---
+// --- 11. LOAD INVENTORY (updated to show active buffs) ---
 async function loadInventory() {
-    const invList = document.getElementById('inventory-list');
-    const trainerName = document.getElementById('trainer-name').innerText.toLowerCase();
-    invList.innerHTML = "<p class='section-title'>OPENING BAG...</p>";
+  const invList = document.getElementById('inventory-list');
+  const trainerName = document.getElementById('trainer-name').innerText.toLowerCase();
+  invList.innerHTML = "<p class='section-title'>OPENING BAG...</p>";
 
-    try {
-        const res = await fetch(`${WORKER_URL}?user=${trainerName}`);
-        const data = await res.json();
-        const inventory = data.inventory || {};
-        
-        const marketRes = await fetch(`${WORKER_URL}?get_market=true`);
-        const catalog = await marketRes.json();
+  try {
+    const res = await fetch(`${WORKER_URL}?user=${trainerName}&userstats=true`);
+    const data = await res.json();
+    const inventory = data.inventory || {};
+    const activeBuffs = data.activeBuffs || {};
 
-        invList.innerHTML = ""; 
+    const marketRes = await fetch(`${WORKER_URL}?get_market=true`);
+    const catalog = await marketRes.json();
 
-        const itemKeys = Object.keys(inventory);
-        if (itemKeys.length === 0) {
-            invList.innerHTML = "<p class='section-title' style='color:#555;'>YOUR BAG IS EMPTY</p>";
-            return;
-        }
+    invList.innerHTML = "";
 
-        itemKeys.forEach(itemId => {
-            const count = inventory[itemId];
-            const itemInfo = catalog[itemId];
-            if (!itemInfo || count <= 0) return;
+    // Show active buffs at the top
+    const activeSummary = [];
+    if (activeBuffs.bottleCapActive) activeSummary.push("🍾 Bottle Cap: ACTIVE (next catch)");
+    if (activeBuffs.masterBallActive) activeSummary.push("🟣 Master Ball: LOADED (next legendary)");
+    if (activeBuffs.incenseCharges > 0) activeSummary.push(`💨 Incense: ${activeBuffs.incenseCharges} catches remaining`);
 
-            const card = document.createElement('div');
-            card.className = 'item-card';
-            card.innerHTML = `
-                <div class="item-icon">${itemInfo.icon}</div>
-                <div class="item-name">${itemInfo.name.toUpperCase()} (x${count})</div>
-                <div class="item-desc">${itemInfo.desc}</div>
-                <button class="use-btn" onclick="useItem('${itemId}')">USE ITEM</button>
-            `;
-            invList.appendChild(card);
-        });
-    } catch (err) {
-        invList.innerHTML = "<p class='section-title' style='color:red;'>ERROR ACCESSING BAG</p>";
+    if (activeSummary.length > 0) {
+      const banner = document.createElement('div');
+      banner.style.cssText = "grid-column: 1/-1; background: rgba(81,255,0,0.07); border: 1px solid #51ff00; border-radius: 8px; padding: 12px 16px; font-family: 'Press Start 2P', cursive; font-size: 0.5rem; color: #51ff00; line-height: 2; margin-bottom: 10px;";
+      banner.innerHTML = "ACTIVE BUFFS<br>" + activeSummary.join('<br>');
+      invList.appendChild(banner);
     }
+
+    const itemKeys = Object.keys(inventory);
+    if (itemKeys.length === 0 && activeSummary.length === 0) {
+      invList.innerHTML = "<p class='section-title' style='color:#555;'>YOUR BAG IS EMPTY</p>";
+      return;
+    }
+
+    itemKeys.forEach(itemId => {
+      const count = inventory[itemId];
+      const itemInfo = catalog[itemId];
+      if (!itemInfo || count <= 0) return;
+
+      const loggedInUser = localStorage.getItem('twitch_user');
+      const isOwner = loggedInUser && loggedInUser.toLowerCase() === trainerName;
+
+      const card = document.createElement('div');
+      card.className = 'item-card';
+      card.innerHTML = `
+        <div class="item-icon">${itemInfo.icon}</div>
+        <div class="item-name">${itemInfo.name.toUpperCase()} (x${count})</div>
+        <div class="item-desc">${itemInfo.desc}</div>
+        ${isOwner ? `<button class="use-btn" onclick="useItem('${itemId}')">USE ITEM</button>` : ''}
+      `;
+      invList.appendChild(card);
+    });
+  } catch (err) {
+    invList.innerHTML = "<p class='section-title' style='color:red;'>ERROR ACCESSING BAG</p>";
+  }
 }
 
 // --- 12. BUY ITEM LOGIC ---
@@ -577,18 +594,26 @@ async function buyItem(itemId) {
     }
 }
 
-// --- 13. USE ITEM (PLACEHOLDER) ---
+// --- 13. USE ITEM ---
 async function useItem(itemId) {
-    const token = localStorage.getItem('auth_token');
-    const user = localStorage.getItem('twitch_user');
-    
-    if (!token || !user) {
-        alert("Authentication error.");
-        return;
-    }
+  const token = localStorage.getItem('auth_token');
+  const user = localStorage.getItem('twitch_user');
+  const trainerName = document.getElementById('trainer-name').innerText.toLowerCase();
 
-    if (await customConfirm(`Do you want to use 1x ${itemId.replace('-', ' ').toUpperCase()}?`)) {
-        alert("Using items is coming in the next update! Stay tuned.");
-        // We'll build the backend for this in the next step
-    }
+  if (!token || !user) { alert("Please log in with Twitch to use items."); return; }
+  if (user.toLowerCase() !== trainerName) { alert("You can only use items on your own account!"); return; }
+
+  const itemNames = { 'bottle-cap': 'Bottle Cap', 'incense': 'Incense', 'master-ball': 'Master Ball' };
+  const confirmed = await customConfirm(`Use 1x ${itemNames[itemId] || itemId}?`);
+  if (!confirmed) return;
+
+  try {
+    const res = await fetch(`${WORKER_URL}?user=${user}&use_item_id=${itemId}&token=${token}`);
+    const result = await res.json();
+    if (result.error) { alert(result.error); return; }
+    await showSuccessModal(result.message);
+    loadInventory(); // Refresh bag to show updated counts + active buffs
+  } catch (e) {
+    alert("Server error. Please try again.");
+  }
 }
