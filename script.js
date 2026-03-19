@@ -86,7 +86,7 @@ async function fetchTrainerData(username) {
         const res = await fetch(`${WORKER_URL}?user=${username}&userstats=true`);
         const data = await res.json();
         
-        if (statTotal) statTotal.innerText = data.total || 0;
+        if (statTotal) statTotal.innerText = (data.collection ? data.collection.length : 0);
         if (statBalance) statBalance.innerText = data.balance?.toLocaleString() || 0;
 
         fullCollection = (data.collection || []).filter(Boolean);
@@ -145,30 +145,25 @@ function renderSprites(list) {
         return;
     }
 
-    // Check if the person viewing is the owner of this collection
     const loggedInUser = localStorage.getItem('twitch_user');
     const trainerNameSpan = document.getElementById('trainer-name');
     const currentTrainer = trainerNameSpan ? trainerNameSpan.innerText.toLowerCase() : '';
     const isOwner = loggedInUser && loggedInUser.toLowerCase() === currentTrainer;
 
-    // Attach ownership class to the body so CSS can reveal buttons
     if (isOwner) document.body.classList.add('is-owner');
     else document.body.classList.remove('is-owner');
 
     list.forEach((item) => {
-        // Use the originalIndex we mapped in fetchTrainerData or sorting
         const actualIndex = item.originalIndex !== undefined ? item.originalIndex : fullCollection.indexOf(item);
         
         let name, isShiny, atk, def, hp, hasPokerus;
 
-        // Modern Object Handling
         if (typeof item === 'object' && item.n) {
             name = item.n;
             isShiny = item.s === 1;
             hasPokerus = item.p === 1;
             [atk, def, hp] = item.iv || [0, 0, 0];
         } 
-        // Legacy String Handling
         else if (typeof item === 'string') {
             isShiny = item.includes('✨');
             hasPokerus = false;
@@ -179,11 +174,9 @@ function renderSprites(list) {
             return; 
         }
 
-        // Check if this Pokemon is a favorite 
         const isFavorited = (item.fav !== undefined && item.fav >= 0 && item.fav <= 3);
 
         const card = document.createElement('div');
-        // Adds 'shiny-card' class for the holographic CSS effect
         card.className = `pokemon-card ${isShiny ? 'shiny-card' : ''}`;
         
         card.innerHTML = `
@@ -216,9 +209,7 @@ function renderSprites(list) {
             </div>
         `;
 
-        // Handle the flip animation / Pokedex detail view
         card.onclick = (e) => {
-            // Do not flip if they clicked a button
             if (e.target.tagName.toLowerCase() === 'button') return;
             openDetailModal(item);
         };
@@ -255,8 +246,8 @@ async function toggleFavoriteDialog(index) {
     }
     let slot = -1;
     for (let i = 0; i < 4; i++) {
-        const img = document.querySelector(`#fav-${i} img`);
-        if (img && img.src.includes('poke-ball.png')) { slot = i; break; }
+        const slotDiv = document.getElementById(`fav-${i}`);
+        if (slotDiv && slotDiv.innerHTML.includes('EMPTY')) { slot = i; break; }
     }
     if (slot !== -1) updateFavorite(slot, index);
     else {
@@ -265,24 +256,20 @@ async function toggleFavoriteDialog(index) {
     }
 }
 
-let isBusyUpdating = false; // Internal lock
+let isBusyUpdating = false; 
 
 async function updateFavorite(slot, pokeIndex) {
     if (isBusyUpdating) return; 
     isBusyUpdating = true;
 
     try {
-        // --- 1. PREPARE DATA ---
-        // Force the username to lowercase here to ensure the KV Database match
         const rawUser = localStorage.getItem('twitch_user') || "";
         const user = rawUser.toLowerCase(); 
-        
         const token = localStorage.getItem('auth_token');
         const targetPoke = fullCollection[pokeIndex];
 
         if (!targetPoke) return;
 
-        // --- 2. OPTIMISTIC UI (Instant change) ---
         if (slot === -1) {
             delete targetPoke.fav; 
         } else {
@@ -290,7 +277,6 @@ async function updateFavorite(slot, pokeIndex) {
             targetPoke.fav = slot;
         }
 
-        // --- 3. REDRAW UI ---
         const tempFavorites = [null, null, null, null];
         fullCollection.forEach(p => {
             if (p.fav !== undefined && p.fav >= 0 && p.fav <= 3) {
@@ -301,17 +287,10 @@ async function updateFavorite(slot, pokeIndex) {
         updateFavoriteUI(tempFavorites);
         applySortAndRender(document.getElementById('sort-order').value);
 
-        // --- 4. BACKGROUND SAVE (Using the lowercase user) ---
         const res = await fetch(`${WORKER_URL}?user=${user}&set_favorite=true&slot=${slot}&index=${pokeIndex}&token=${token}`);
-        
-        if (!res.ok) {
-            const errorMsg = await res.text();
-            console.error("Server rejected save:", errorMsg);
-            // If it failed, pull the "truth" from the DB
-            fetchTrainerData(user); 
-        }
+        if (!res.ok) { fetchTrainerData(user); }
     } catch (e) {
-        console.error("Network error during favorite update:", e);
+        console.error("Network error:", e);
     } finally {
         isBusyUpdating = false; 
     }
@@ -323,7 +302,7 @@ if (filterInput) {
     filterInput.addEventListener('input', (e) => {
         const term = e.target.value.toLowerCase();
         const filtered = fullCollection.map((p, i) => ({...p, originalIndex: i}))
-                         .filter(p => p.n.toLowerCase().includes(term));
+                                 .filter(p => p.n.toLowerCase().includes(term));
         renderSprites(filtered);
     });
 }
@@ -378,19 +357,14 @@ function showSuccessModal(message) {
 }
 
 async function openDetailModal(pokeData) {
-    // 1. Get UI Elements
     const modal = document.getElementById('detail-modal');
     const innerCard = document.getElementById('detail-card-inner');
     const dexElement = document.getElementById('detail-dex-entry');
     const typesContainer = document.getElementById('detail-types');
     const closeBtn = document.getElementById('close-detail');
 
-    if (!modal || !innerCard) {
-        console.error("Modal elements not found in HTML!");
-        return;
-    }
+    if (!modal || !innerCard) return;
 
-    // 2. Setup Closing Logic (Safe & Early)
     const close = () => {
         innerCard.classList.remove('show');
         setTimeout(() => modal.classList.add('hidden'), 400);
@@ -398,17 +372,12 @@ async function openDetailModal(pokeData) {
     closeBtn.onclick = close;
     modal.onclick = (e) => { if (e.target === modal) close(); };
 
-    // 3. Populate Basic Data (Pre-Fetch)
     const isShiny = pokeData.s === 1;
     const name = pokeData.n || "Unknown";
     const id = pokeData.id || 0;
 
-    // Apply the Shiny Glow class to the expanded card
-    if (isShiny) {
-        innerCard.classList.add('is-shiny');
-    } else {
-        innerCard.classList.remove('is-shiny');
-    }
+    if (isShiny) innerCard.classList.add('is-shiny');
+    else innerCard.classList.remove('is-shiny');
 
     document.getElementById('detail-name').innerText = name.toUpperCase() + (isShiny ? " ✨" : "");
     document.getElementById('detail-img').src = `https://img.pokemondb.net/sprites/home/${isShiny ? 'shiny' : 'normal'}/${name.toLowerCase()}.png`;
@@ -418,43 +387,33 @@ async function openDetailModal(pokeData) {
     document.getElementById('detail-def').innerText = def;
     document.getElementById('detail-hp').innerText = hp;
     
-    // Set loading states
     if (dexElement) dexElement.innerText = "Accessing global Pokédex...";
     if (typesContainer) typesContainer.innerHTML = "";
 
-    // 4. Trigger the Flip Animation
     modal.classList.remove('hidden');
     setTimeout(() => innerCard.classList.add('show'), 10);
 
-    // 5. Fetch Live API Data (Types & Lore)
     try {
         const query = id || name.toLowerCase();
         const [speciesRes, pokemonRes] = await Promise.all([
             fetch(`https://pokeapi.co/api/v2/pokemon-species/${query}`),
             fetch(`https://pokeapi.co/api/v2/pokemon/${query}`)
         ]);
-        
         const speciesData = await speciesRes.json();
         const pokemonData = await pokemonRes.json();
-        
-        // Build Type Bubbles
         if (typesContainer) {
             typesContainer.innerHTML = "";
             pokemonData.types.forEach(t => {
                 typesContainer.innerHTML += `<span class="type-bubble type-${t.type.name}">${t.type.name}</span>`;
             });
         }
-
-        // Find English Pokedex Entry
         const entry = speciesData.flavor_text_entries.find(f => f.language.name === "en");
-        if (dexElement) {
-            dexElement.innerText = entry ? `"${entry.flavor_text.replace(/\f|\n/g, ' ')}"` : "No entry found.";
-        }
+        if (dexElement) dexElement.innerText = entry ? `"${entry.flavor_text.replace(/\f|\n/g, ' ')}"` : "No entry found.";
     } catch (e) {
-        console.error("Dex Fetch Error:", e);
         if (dexElement) dexElement.innerText = "Error: Database connection lost.";
     }
 }
+
 document.getElementById('open-drawer').onclick = () => document.getElementById('info-drawer').classList.remove('hidden');
 document.getElementById('close-drawer').onclick = () => document.getElementById('info-drawer').classList.add('hidden');
 
@@ -462,12 +421,138 @@ document.getElementById('close-drawer').onclick = () => document.getElementById(
 const repairBtn = document.getElementById('repair-btn');
 if (repairBtn) {
     repairBtn.onclick = async () => {
-        // Use our custom confirm modal for a consistent look
         const isSure = await customConfirm("This will log you out and reset your settings. Repair now?");
-        
         if (isSure) {
-            localStorage.clear(); // Wipes Twitch token, saved sort, etc.
-            window.location.href = window.location.pathname; // Reloads without URL params
+            localStorage.clear();
+            window.location.href = window.location.pathname;
         }
     };
+}
+
+// --- 9. TAB CONTROLLER ---
+document.querySelectorAll('.tab-btn').forEach(button => {
+    button.addEventListener('click', () => {
+        const targetTab = button.getAttribute('data-tab');
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        button.classList.add('active');
+        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+        document.getElementById(`${targetTab}-tab`).classList.add('active');
+
+        if (targetTab === 'market') loadMarket();
+        if (targetTab === 'inventory') loadInventory();
+        if (targetTab === 'collection') fetchTrainerData(document.getElementById('trainer-name').innerText.toLowerCase());
+    });
+});
+
+// --- 10. LOAD MARKET (POKÉ MART) ---
+async function loadMarket() {
+    const marketList = document.getElementById('market-list');
+    marketList.innerHTML = "<p class='section-title'>CONNECTING TO MART...</p>";
+
+    try {
+        const res = await fetch(`${WORKER_URL}?get_market=true`);
+        const items = await res.json();
+        marketList.innerHTML = ""; 
+
+        Object.values(items).forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'item-card';
+            card.innerHTML = `
+                <div class="item-icon">${item.icon}</div>
+                <div class="item-name">${item.name.toUpperCase()}</div>
+                <div class="item-desc">${item.desc}</div>
+                <div class="item-price">₽${item.price.toLocaleString()}</div>
+                <button class="buy-btn" onclick="buyItem('${item.id}')">PURCHASE</button>
+            `;
+            marketList.appendChild(card);
+        });
+    } catch (err) {
+        marketList.innerHTML = "<p class='section-title' style='color:red;'>MART OFFLINE</p>";
+    }
+}
+
+// --- 11. LOAD INVENTORY (MY BAG) ---
+async function loadInventory() {
+    const invList = document.getElementById('inventory-list');
+    const trainerName = document.getElementById('trainer-name').innerText.toLowerCase();
+    invList.innerHTML = "<p class='section-title'>OPENING BAG...</p>";
+
+    try {
+        const res = await fetch(`${WORKER_URL}?user=${trainerName}`);
+        const data = await res.json();
+        const inventory = data.inventory || {};
+        
+        const marketRes = await fetch(`${WORKER_URL}?get_market=true`);
+        const catalog = await marketRes.json();
+
+        invList.innerHTML = ""; 
+
+        const itemKeys = Object.keys(inventory);
+        if (itemKeys.length === 0) {
+            invList.innerHTML = "<p class='section-title' style='color:#555;'>YOUR BAG IS EMPTY</p>";
+            return;
+        }
+
+        itemKeys.forEach(itemId => {
+            const count = inventory[itemId];
+            const itemInfo = catalog[itemId];
+            if (!itemInfo || count <= 0) return;
+
+            const card = document.createElement('div');
+            card.className = 'item-card';
+            card.innerHTML = `
+                <div class="item-icon">${itemInfo.icon}</div>
+                <div class="item-name">${itemInfo.name.toUpperCase()} (x${count})</div>
+                <div class="item-desc">${itemInfo.desc}</div>
+                <button class="use-btn" onclick="useItem('${itemId}')">USE ITEM</button>
+            `;
+            invList.appendChild(card);
+        });
+    } catch (err) {
+        invList.innerHTML = "<p class='section-title' style='color:red;'>ERROR ACCESSING BAG</p>";
+    }
+}
+
+// --- 12. BUY ITEM LOGIC ---
+async function buyItem(itemId) {
+    const token = localStorage.getItem('auth_token'); // Standardized to match handleTwitchRedirect
+    const trainerName = document.getElementById('trainer-name').innerText.toLowerCase();
+
+    if (!token) {
+        alert("Please login with Twitch to purchase items!");
+        return;
+    }
+
+    try {
+        const res = await fetch(`${WORKER_URL}?buy_item_id=${itemId}&user=${trainerName}&token=${token}`);
+        const result = await res.json();
+
+        if (result.error) {
+            alert(result.error);
+        } else {
+            alert(`Successfully purchased ${itemId}!`);
+            if (document.getElementById('stat-balance')) {
+                document.getElementById('stat-balance').innerText = result.balance.toLocaleString();
+            }
+            loadMarket(); 
+        }
+    } catch (err) {
+        alert("Transaction failed.");
+    }
+}
+
+// --- 13. USE ITEM (PLACEHOLDER) ---
+async function useItem(itemId) {
+    const token = localStorage.getItem('auth_token');
+    const user = localStorage.getItem('twitch_user');
+    
+    if (!token || !user) {
+        alert("Authentication error.");
+        return;
+    }
+
+    if (await customConfirm(`Do you want to use 1x ${itemId.replace('-', ' ').toUpperCase()}?`)) {
+        alert("Using items is coming in the next update! Stay tuned.");
+        // We'll build the backend for this in the next step
+    }
 }
