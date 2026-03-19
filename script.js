@@ -451,3 +451,17 @@ async function openDetailModal(pokeData) {
 }
 document.getElementById('open-drawer').onclick = () => document.getElementById('info-drawer').classList.remove('hidden');
 document.getElementById('close-drawer').onclick = () => document.getElementById('info-drawer').classList.add('hidden');
+
+// --- SYSTEM REPAIR ENGINE ---
+const repairBtn = document.getElementById('repair-btn');
+if (repairBtn) {
+    repairBtn.onclick = async () => {
+        // Use our custom confirm modal for a consistent look
+        const isSure = await customConfirm("This will log you out and reset your settings. Repair now?");
+        
+        if (isSure) {
+            localStorage.clear(); // Wipes Twitch token, saved sort, etc.
+            window.location.href = window.location.pathname; // Reloads without URL params
+        }
+    };
+}
