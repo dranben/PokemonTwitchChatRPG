@@ -892,3 +892,74 @@ header {
 }
 
 /* Make sure to DELETE any .fav-slot:first-child img rules you had so the sprite stays put! */
+
+/* --- TAB SYSTEM --- */
+.tab-container {
+    display: flex;
+    justify-content: space-around;
+    gap: 5px;
+    margin: 15px 0;
+}
+
+.tab-btn {
+    background: transparent;
+    color: #555;
+    border: 1px solid #333;
+    padding: 8px 5px;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 0.5rem;
+    cursor: pointer;
+    flex: 1;
+    transition: 0.2s;
+}
+
+.tab-btn.active {
+    color: #ff4b4b; /* Your Battle Slot Red */
+    border-color: #ff4b4b;
+    background: rgba(255, 75, 75, 0.1);
+}
+
+.section-title {
+    font-family: 'Press Start 2P', cursive;
+    font-size: 0.7rem;
+    color: #51ff00; /* Neon Green */
+    text-align: center;
+    margin: 20px 0;
+}
+
+/* --- VISIBILITY LOGIC --- */
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* --- ITEM GRIDS --- */
+.item-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 15px;
+    padding-bottom: 50px;
+}
+
+.item-card {
+    background: #111;
+    border: 1px solid #333;
+    padding: 15px;
+    text-align: center;
+    border-radius: 4px;
+}
+
+.item-icon { font-size: 2rem; margin-bottom: 10px; }
+.item-name { font-size: 0.6rem; color: #fff; margin-bottom: 5px; font-weight: bold;}
+.item-price { color: #ffd700; font-size: 0.6rem; margin-bottom: 10px; }
+.item-desc { font-size: 0.5rem; color: #888; margin-bottom: 15px; line-height: 1.4; }
+
+.buy-btn, .use-btn {
+    width: 100%;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 0.45rem;
+    padding: 8px 0;
+    cursor: pointer;
+    border: none;
+}
+
+.buy-btn { background: #28a745; color: white; }
+.use-btn { background: #007bff; color: white; }
