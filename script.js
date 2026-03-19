@@ -486,16 +486,15 @@ async function loadMarket() {
     marketList.innerHTML = "<p class='section-title'>CONNECTING TO MART...</p>";
 
     try {
+        console.log("1. Fetching market...");
         const res = await fetch(`${WORKER_URL}?get_market=true`);
+        console.log("2. Response status:", res.status);
         const items = await res.json();
+        console.log("3. Items received:", items);
         marketList.innerHTML = "";
 
-        // Fetch all sprites in parallel
-        const spriteResults = await Promise.all(
-            Object.values(items).map(item => getItemSprite(item.spriteId, item.icon))
-        );
-
         Object.values(items).forEach((item, i) => {
+            console.log("4. Rendering item:", item.name, "img:", item.img);
             const card = document.createElement('div');
             card.className = 'item-card';
             card.innerHTML = `
@@ -509,6 +508,7 @@ async function loadMarket() {
             marketList.appendChild(card);
         });
     } catch (err) {
+        console.log("ERROR:", err);
         marketList.innerHTML = "<p class='section-title' style='color:red;'>MART OFFLINE</p>";
     }
 }
