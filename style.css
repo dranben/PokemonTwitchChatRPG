@@ -862,3 +862,37 @@ header {
     color: #fff;
     box-shadow: 0 0 15px #ff3333;
 }
+
+/* --- BATTLE SLOT HIGHLIGHT (SLOT 1) --- */
+
+/* 1. Target the very first favorite box */
+.fav-slot:first-child { 
+    border: 2px solid #ff4b4b !important;
+    box-shadow: 0 0 12px rgba(255, 75, 75, 0.4), inset 0 0 15px rgba(255, 75, 75, 0.1);
+    position: relative;
+    overflow: hidden; /* Keeps the banner neatly inside the box's corners */
+    transform: translateY(-2px); /* Pops it out slightly from the other 3 */
+}
+
+/* 2. Create the "BATTLE SLOT" top ribbon */
+.fav-slot:first-child::before {
+    content: "BATTLE SLOT";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: #ff4b4b;
+    color: white;
+    font-size: 0.65rem;
+    font-weight: 800;
+    text-align: center;
+    padding: 3px 0;
+    letter-spacing: 1px;
+    z-index: 10;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* Push the Pokémon sprite down slightly so it doesn't overlap the banner */
+.fav-slot:first-child img {
+    margin-top: 15px; /* You can tweak this number if the sprite looks too high or low */
+}
