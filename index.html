@@ -31,42 +31,61 @@
             <p class="subtitle">Pokemon Twitch Chat RPG</p>
         </div>
 
-        <div class="trainer-stats-bar">
-            <div class="stat-item">
-                <span class="label">TOTAL CAUGHT:</span>
-                <span id="stat-total" class="value">0</span>
-            </div>
-            <div class="stat-item">
-                <span class="label">BALANCE:</span>
-                <span class="value">₽</span><span id="stat-balance" class="value">0</span>
-            </div>
-        </div>
-
-        <div class="controls-row">
-            <input type="text" id="pokemon-filter" placeholder="Filter by Name...">
-            <select id="sort-order">
-                <option value="newest">Newest First</option>
-                <option value="oldest">Oldest First</option>
-                <option value="pokedex">Pokédex #</option>
-                <option value="alpha">A-Z</option>
-                <option value="shiny">Shinies</option>
-            </select>
+        <div class="tab-container">
+            <button class="tab-btn active" data-tab="collection">COLLECTION</button>
+            <button class="tab-btn" data-tab="inventory">MY BAG</button>
+            <button class="tab-btn" data-tab="market">POKÉ MART</button>
         </div>
 
         <hr class="divider">
-        <div class="favorites-container">
-            <h2 class="favorites-title">FAVORITE POKÉMON</h2>
-            <div id="favorites-slots" class="favorites-grid">
-                <div class="fav-slot" id="fav-0"><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png"></div>
-                <div class="fav-slot" id="fav-1"><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png"></div>
-                <div class="fav-slot" id="fav-2"><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png"></div>
-                <div class="fav-slot" id="fav-3"><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png"></div>
+
+        <div id="collection-tab" class="tab-content active">
+            <div class="trainer-stats-bar">
+                <div class="stat-item">
+                    <span class="label">TOTAL CAUGHT:</span>
+                    <span id="stat-total" class="value">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="label">BALANCE:</span>
+                    <span class="value">₽</span><span id="stat-balance" class="value">0</span>
+                </div>
             </div>
+
+            <div class="controls-row">
+                <input type="text" id="pokemon-filter" placeholder="Filter by Name...">
+                <select id="sort-order">
+                    <option value="newest">Newest First</option>
+                    <option value="oldest">Oldest First</option>
+                    <option value="pokedex">Pokédex #</option>
+                    <option value="alpha">A-Z</option>
+                    <option value="shiny">Shinies</option>
+                </select>
+            </div>
+
+            <div class="favorites-container">
+                <h2 class="favorites-title">FAVORITE POKÉMON</h2>
+                <div id="favorites-slots" class="favorites-grid">
+                    <div class="fav-slot" id="fav-0"><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png"></div>
+                    <div class="fav-slot" id="fav-1"><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png"></div>
+                    <div class="fav-slot" id="fav-2"><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png"></div>
+                    <div class="fav-slot" id="fav-3"><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png"></div>
+                </div>
+            </div>
+            
+            <div id="pokemon-display"></div>
         </div>
-        
-        <hr class="divider">
-        <div id="pokemon-display"></div>
-        
+
+        <div id="inventory-tab" class="tab-content">
+            <h2 class="section-title">TRAINER INVENTORY</h2>
+            <div id="inventory-list" class="item-grid">
+                </div>
+        </div>
+
+        <div id="market-tab" class="tab-content">
+            <h2 class="section-title">POKÉ MART</h2>
+            <div id="market-list" class="item-grid">
+                </div>
+        </div>
     </main>
 
     <div id="info-drawer" class="drawer hidden">
