@@ -964,47 +964,123 @@ header {
 .buy-btn { background: #28a745; color: white; }
 .use-btn { background: #007bff; color: white; }
 
-/* --- 1. CENTER THE GRIDS --- */
+/* --- ITEM GRIDS --- */
 .item-grid {
     display: grid;
-    /* This ensures cards don't stretch too wide on desktop */
-    grid-template-columns: repeat(auto-fill, minmax(160px, 180px)); 
+    grid-template-columns: repeat(auto-fill, minmax(200px, 220px));
     gap: 20px;
-    padding: 20px 0;
-    justify-content: center; /* THE FIX: Centers the tiles in the container */
+    padding: 20px 0 50px;
+    justify-content: center;
     margin: 0 auto;
-    max-width: 1000px; /* Optional: keeps the shop from getting too wide on huge monitors */
+    max-width: 1000px;
 }
 
-/* --- 2. CENTER THE STATUS MESSAGES --- */
-.section-title, 
-#inventory-list p, 
-#market-list p {
-    grid-column: 1 / -1; /* THE FIX: Makes the text span all columns so it can center */
-    text-align: center;
-    width: 100%;
-    margin-top: 30px;
-    font-family: 'Press Start 2P', cursive;
-    font-size: 0.65rem;
-    color: #555;
-    letter-spacing: 1px;
-}
-
-/* --- 3. POLISH THE ITEM CARDS --- */
 .item-card {
-    background: #151515;
-    border: 2px solid #333;
-    padding: 20px 10px;
+    background: #0d0d0d;
+    border: 2px solid #2a2a2a;
+    padding: 24px 16px 20px;
     text-align: center;
-    border-radius: 8px;
+    border-radius: 10px;
     display: flex;
     flex-direction: column;
-    justify-content: space-between; /* Keeps the Purchase button at the bottom */
-    transition: 0.2s;
+    align-items: center;
+    gap: 10px;
+    transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Subtle scanline texture to match the retro aesthetic */
+.item-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 3px,
+        rgba(255,255,255,0.012) 3px,
+        rgba(255,255,255,0.012) 4px
+    );
+    pointer-events: none;
 }
 
 .item-card:hover {
-    border-color: #ff4b4b;
-    transform: translateY(-3px);
-    box-shadow: 0 5px 15px rgba(255, 75, 75, 0.2);
+    border-color: #51ff00;
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(81, 255, 0, 0.15);
+}
+
+.item-icon {
+    font-size: 2.8rem;
+    line-height: 1;
+    margin-bottom: 4px;
+    filter: drop-shadow(0 0 8px rgba(255,255,255,0.15));
+}
+
+.item-name {
+    font-family: 'Press Start 2P', cursive;
+    font-size: 0.65rem;
+    color: #ffffff;
+    letter-spacing: 1px;
+    line-height: 1.6;
+}
+
+.item-price {
+    font-family: 'Press Start 2P', cursive;
+    font-size: 0.7rem;
+    color: #ffd700;
+    text-shadow: 0 0 8px rgba(255, 215, 0, 0.4);
+    letter-spacing: 1px;
+}
+
+.item-desc {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 0.78rem;
+    color: #999;
+    line-height: 1.6;
+    flex-grow: 1;
+    padding: 0 4px;
+}
+
+.buy-btn {
+    width: 100%;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 0.5rem;
+    padding: 10px 0;
+    cursor: pointer;
+    border: 2px solid #51ff00;
+    background: transparent;
+    color: #51ff00;
+    border-radius: 4px;
+    letter-spacing: 1px;
+    transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+    margin-top: 4px;
+}
+
+.buy-btn:hover {
+    background: #51ff00;
+    color: #000;
+    box-shadow: 0 0 12px rgba(81, 255, 0, 0.4);
+}
+
+.use-btn {
+    width: 100%;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 0.5rem;
+    padding: 10px 0;
+    cursor: pointer;
+    border: 2px solid #4da8ff;
+    background: transparent;
+    color: #4da8ff;
+    border-radius: 4px;
+    letter-spacing: 1px;
+    transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+    margin-top: 4px;
+}
+
+.use-btn:hover {
+    background: #4da8ff;
+    color: #000;
+    box-shadow: 0 0 12px rgba(77, 168, 255, 0.4);
 }
