@@ -429,21 +429,43 @@ if (repairBtn) {
     };
 }
 
-// --- 9. TAB CONTROLLER ---
-document.querySelectorAll('.tab-btn').forEach(button => {
-    button.addEventListener('click', () => {
-        const targetTab = button.getAttribute('data-tab');
-        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-        button.classList.add('active');
-        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-        document.getElementById(`${targetTab}-tab`).classList.add('active');
+// --- 9. TAB CONTROLLER (Updated Fix) ---
+function initTabs() {
+    const tabs = document.querySelectorAll('.tab-btn');
+    console.log("Found tabs:", tabs.length); // Should say 3
 
-        if (targetTab === 'market') loadMarket();
-        if (targetTab === 'inventory') loadInventory();
-        if (targetTab === 'collection') fetchTrainerData(document.getElementById('trainer-name').innerText.toLowerCase());
+    tabs.forEach(button => {
+        button.onclick = () => { // Using .onclick directly is more reliable for debugging
+            const targetTab = button.getAttribute('data-tab');
+            console.log("Switching to tab:", targetTab);
+
+            // 1. Reset Buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+
+            // 2. Reset Content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+                content.style.display = 'none';
+            });
+
+            // 3. Show Target
+            const targetEl = document.getElementById(`${targetTab}-tab`);
+            if (targetEl) {
+                targetEl.classList.add('active');
+                targetEl.style.display = 'block';
+            }
+
+            // 4. Load Data
+            if (targetTab === 'market') loadMarket();
+            if (targetTab === 'inventory') loadInventory();
+            if (targetTab === 'collection') fetchTrainerData(document.getElementById('trainer-name').innerText.toLowerCase());
+        };
     });
-});
+}
 
+// Add this line inside your window.onload function at the very bottom
+// window.onload = async () => { ... initTabs(); }
 // --- 10. LOAD MARKET (POKÉ MART) ---
 async function loadMarket() {
     const marketList = document.getElementById('market-list');
