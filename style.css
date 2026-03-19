@@ -963,3 +963,48 @@ header {
 
 .buy-btn { background: #28a745; color: white; }
 .use-btn { background: #007bff; color: white; }
+
+/* --- 1. CENTER THE GRIDS --- */
+.item-grid {
+    display: grid;
+    /* This ensures cards don't stretch too wide on desktop */
+    grid-template-columns: repeat(auto-fill, minmax(160px, 180px)); 
+    gap: 20px;
+    padding: 20px 0;
+    justify-content: center; /* THE FIX: Centers the tiles in the container */
+    margin: 0 auto;
+    max-width: 1000px; /* Optional: keeps the shop from getting too wide on huge monitors */
+}
+
+/* --- 2. CENTER THE STATUS MESSAGES --- */
+.section-title, 
+#inventory-list p, 
+#market-list p {
+    grid-column: 1 / -1; /* THE FIX: Makes the text span all columns so it can center */
+    text-align: center;
+    width: 100%;
+    margin-top: 30px;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 0.65rem;
+    color: #555;
+    letter-spacing: 1px;
+}
+
+/* --- 3. POLISH THE ITEM CARDS --- */
+.item-card {
+    background: #151515;
+    border: 2px solid #333;
+    padding: 20px 10px;
+    text-align: center;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Keeps the Purchase button at the bottom */
+    transition: 0.2s;
+}
+
+.item-card:hover {
+    border-color: #ff4b4b;
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(255, 75, 75, 0.2);
+}
