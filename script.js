@@ -5,6 +5,8 @@ const WORKER_URL = "https://pokemon.brandenkenn.workers.dev";
 let fullCollection = []; 
 
 // --- 1. INITIALIZATION ---
+let isSavingFavorite = false;
+
 window.onload = async () => {
     await handleTwitchRedirect();
 
@@ -264,22 +266,39 @@ async function toggleFavoriteDialog(index) {
 }
 
 async function updateFavorite(slot, pokeIndex) {
+    if (isSavingFavorite) return; // Prevent "Double Clicking" glitches
+    isSavingFavorite = true;
+
     const user = localStorage.getItem('twitch_user');
     const token = localStorage.getItem('auth_token');
-    const target = fullCollection[pokeIndex];
-    if (slot === -1) delete target.fav;
-    else {
+    const targetPoke = fullCollection[pokeIndex];
+
+    // --- 1. OPTIMISTIC UI (THE INSTANT CHANGE) ---
+    if (slot === -1) {
+        delete targetPoke.fav; 
+    } else {
         fullCollection.forEach(p => { if (p.fav === slot) delete p.fav; });
-        target.fav = slot;
+        targetPoke.fav = slot;
     }
-    const temp = [null, null, null, null];
-    fullCollection.forEach(p => { if (p.fav !== undefined) temp[p.fav] = p; });
-    updateFavoriteUI(temp);
+
+    // Immediately Redraw (This makes the star yellow)
+    updateFavoriteUI_Local(); // Helper to just refresh the top bar
     applySortAndRender(document.getElementById('sort-order').value);
+
+    // --- 2. THE BACKGROUND SAVE ---
     try {
         const res = await fetch(`${WORKER_URL}?user=${user}&set_favorite=true&slot=${slot}&index=${pokeIndex}&token=${token}`);
-        if (!res.ok) fetchTrainerData(user);
-    } catch (e) { console.error(e); }
+        
+        if (!res.ok) {
+            // IF SERVER FAILS: Only then do we revert and show error
+            console.error("Save failed");
+            fetchTrainerData(user); // Force a hard reset to reality
+        }
+    } catch (e) {
+        console.error("Network error");
+    } finally {
+        isSavingFavorite = false; // Unlock the button
+    }
 }
 
 // --- 7. LISTENERS ---
