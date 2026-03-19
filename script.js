@@ -488,14 +488,18 @@ async function loadMarket() {
     try {
         const res = await fetch(`${WORKER_URL}?get_market=true`);
         const items = await res.json();
-        marketList.innerHTML = ""; 
+        marketList.innerHTML = "";
 
-        Object.values(items).forEach(item => {
+        // Fetch all sprites in parallel
+        const spriteResults = await Promise.all(
+            Object.values(items).map(item => getItemSprite(item.spriteId, item.icon))
+        );
+
+        Object.values(items).forEach((item, i) => {
             const card = document.createElement('div');
             card.className = 'item-card';
             card.innerHTML = `
-                <img src="${item.img}" alt="${item.name}" 
-                    style="width:60px; height:60px; object-fit:contain; image-rendering:pixelated; margin-bottom:4px;">
+                ${renderItemIcon(spriteResults[i])}
                 <div class="item-name">${item.name.toUpperCase()}</div>
                 <div class="item-desc">${item.desc}</div>
                 <div class="item-price">₽${item.price.toLocaleString()}</div>
@@ -544,30 +548,34 @@ async function loadInventory() {
       return;
     }
 
-    itemKeys.forEach(itemId => {
+    const loggedInUser = localStorage.getItem('twitch_user');
+    const isOwner = loggedInUser && loggedInUser.toLowerCase() === trainerName;
+
+    // Fetch all sprites in parallel
+    const itemsToRender = itemKeys.filter(id => catalog[id] && inventory[id] > 0);
+    const spriteResults = await Promise.all(
+      itemsToRender.map(id => getItemSprite(catalog[id].spriteId, catalog[id].icon))
+    );
+
+    itemsToRender.forEach((itemId, i) => {
       const count = inventory[itemId];
       const itemInfo = catalog[itemId];
-      if (!itemInfo || count <= 0) return;
-
-      const loggedInUser = localStorage.getItem('twitch_user');
-      const isOwner = loggedInUser && loggedInUser.toLowerCase() === trainerName;
 
       const card = document.createElement('div');
       card.className = 'item-card';
       card.innerHTML = `
-        <img src="${itemInfo.img}" alt="${itemInfo.name}" 
-             style="width:60px; height:60px; object-fit:contain; image-rendering:pixelated; margin-bottom:4px;">
+        ${renderItemIcon(spriteResults[i])}
         <div class="item-name">${itemInfo.name.toUpperCase()} (x${count})</div>
         <div class="item-desc">${itemInfo.desc}</div>
         ${isOwner ? `<button class="use-btn" onclick="useItem('${itemId}')">USE ITEM</button>` : ''}
       `;
       invList.appendChild(card);
     });
+
   } catch (err) {
     invList.innerHTML = "<p class='section-title' style='color:red;'>ERROR ACCESSING BAG</p>";
   }
 }
-
 // --- 12. BUY ITEM LOGIC ---
 async function buyItem(itemId) {
     const token = localStorage.getItem('auth_token'); // Standardized to match handleTwitchRedirect
@@ -618,4 +626,29 @@ async function useItem(itemId) {
   } catch (e) {
     alert("Server error. Please try again.");
   }
+}
+// --- ITEM SPRITE HELPER ---
+const itemSpriteCache = {};
+
+async function getItemSprite(spriteId, fallbackIcon) {
+    if (itemSpriteCache[spriteId]) return itemSpriteCache[spriteId];
+    try {
+        const res = await fetch(`https://pokeapi.co/api/v2/item/${spriteId}`);
+        if (!res.ok) throw new Error('not found');
+        const data = await res.json();
+        const url = data.sprites?.default;
+        if (!url) throw new Error('no sprite');
+        itemSpriteCache[spriteId] = { type: 'img', url };
+        return itemSpriteCache[spriteId];
+    } catch {
+        itemSpriteCache[spriteId] = { type: 'emoji', icon: fallbackIcon };
+        return itemSpriteCache[spriteId];
+    }
+}
+
+function renderItemIcon(sprite) {
+    if (sprite.type === 'img') {
+        return `<img src="${sprite.url}" alt="item" style="width:56px;height:56px;object-fit:contain;image-rendering:pixelated;filter:drop-shadow(0 0 6px rgba(255,255,255,0.15));">`;
+    }
+    return `<div class="item-icon">${sprite.icon}</div>`;
 }
